@@ -9,13 +9,13 @@ fluidPage(
   titlePanel("TO 414 Homework 3 by Michael Im"),
   
   sidebarLayout(
-
-      selectInput("mintime", 
-                  label = "Choose first time.", 
-                  choices = unique(cbdata$starttime_time)),
-      selectInput("maxtime", 
-                  label = "Choose later time.", 
-                  choices = unique(cbdata$starttime_time))
+    
+    selectInput("mintime", 
+                label = "Choose first time.", 
+                choices = unique(cbdata$starttime)),
+    selectInput("maxtime", 
+                label = "Choose later time.", 
+                choices = unique(cbdata$starttime))
   ),
     
   mainPanel(

@@ -10,6 +10,7 @@ shinyServer(function(input, output) {
 
   selectedmintime <- reactive({input$mintime})
   selectedmaxtime <- reactive({input$maxtime})
+  
   citisubset <- reactive({subset(cbdata, 
                                  cbdata$starttime_time >= selectedmintime & cbdata$starttime_time <= selectedmaxtime)})
   output$myText <- renderText(paste("Mintime: ", input$mintime, "  ", "Maxtime: ",
