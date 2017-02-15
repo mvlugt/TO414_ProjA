@@ -8,8 +8,8 @@ cbdata <- read.csv("citibike2.csv", header = TRUE)
 
 shinyServer(function(input, output) {
 
-  selectedmintime <- reactive({input$mintime})
-  selectedmaxtime <- reactive({input$maxtime})
+  #selectedmintime <- reactive({input$mintime})
+  #selectedmaxtime <- reactive({input$maxtime})
   
   citisubset <- reactive({subset(cbdata, 
                                  as.integer(cbdata$starttime) >= input$mintime & as.integer(cbdata$starttime) <= input$maxtime)})
