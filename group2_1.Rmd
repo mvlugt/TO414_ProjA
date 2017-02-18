@@ -13,11 +13,51 @@ library(data.table)
 
 cb <- read.csv("citibike_new.csv") #CHANGE SO THAT IT FITS THE MERGED FILE
 
+```
+
+
+```{r}
+
 #function count number of start times and end times and then find difference
+#TIME FUNCTION
 ride_volume <- function(time){
-  starts <- nrows(subset(cb, cb$starttime_time <= time))
-  ends <- nrows(subset(cb, cb$stoptime_time <= time))
-  volume <- starts - ends
+  volume <- nrow(subset(cb, cb$starttime_time <= time & cb$stoptime_time >= time))
   volume
 }
+
+
+
+cb$ride_volumes <- ride_volume(cb$starttime_time)
+
+hours <- c(100,130,200,230,300,330,400,430,500,530, 600,630,700,730,800,830,900,930,1000,1030,1100,1130,1200,1230,1300,1330,1400,1430,1500,1530,1600,1630,1700,1730,1800,1830,1900,1930,2000,2030,2100,2130,2200,2230,2300,2330,2400)
+
+volumes <- c(ride_volume(100),  ride_volume(130), ride_volume(200), ride_volume(230), ride_volume(300), ride_volume(330), ride_volume(400), ride_volume(430), ride_volume(500), ride_volume(530), ride_volume(600), ride_volume(630), ride_volume(700),ride_volume(730), ride_volume(800), ride_volume(830), ride_volume(900), ride_volume(930), ride_volume(1000),ride_volume(1030), ride_volume(1100), ride_volume(1130), ride_volume(1200), ride_volume(1230), ride_volume(1300), ride_volume(1330), ride_volume(1400), ride_volume(1430), ride_volume(1500), ride_volume(1530), ride_volume(1600),ride_volume(1630), ride_volume(1700), ride_volume(1730), ride_volume(1800), ride_volume(1830), ride_volume(1900), ride_volume(1930), ride_volume(2000),ride_volume(2030), ride_volume(2100), ride_volume(2130), ride_volume(2200), ride_volume(2230), ride_volume(2300),ride_volume(2330), ride_volume(2400))
+hour_volume <- data.frame(hours, volumes)
+
+plot(hour_volume)
+
+ggplot(data = hour_volume, aes(x = hour_volume$hours, y = hour_volume$volumes)) + geom_line() + labs(title = "Ride Volume Throughout Average Day", x = "Time of Day", y = "Ride Volume (numbers of bikers)")
+
+
+
+
+```
+
+```{r}
+
+#DAY OF THE WEEK
+cb_sample <- sample_n(cb, 1000)
+#need bar graph and read from new csv file
+
+
+```
+
+
+```{r}
+
+#month
+cb_sample <- sample_n(cb, 1000)
+#line graph and read from new csv file
+
+
 ```
