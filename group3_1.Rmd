@@ -42,7 +42,7 @@ leaflet(quakes) %>% addTiles() %>% addMarkers(
 
 ```{r}
 
-cb_sample <- cb[1:500,]
+cb_sample <- cb[1:5000,]
 
 leaflet(data = cb_sample) %>% addTiles() %>%
   addMarkers(~cb_sample$end.station.longitude, ~cb_sample$start.station.latitude, popup = ~cb_sample$start.station.name, clusterOptions = markerClusterOptions()) %>%   addProviderTiles("CartoDB.Positron")
