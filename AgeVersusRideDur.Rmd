@@ -1,0 +1,26 @@
+---
+title: "AgeVersusRideDur"
+author: ""
+date: "2/18/2017"
+output: html_document
+---
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+#library(data.table)
+#Linear regression with ride duration being the dependent variable
+cb <- read.csv("citibike_new.csv")
+
+#Linear regression with ride duration being the dependent variable
+cb$age <- (2017 - cb$birth.year)
+rideDur <- lm(cb$tripduration ~ cb$age)
+df <- data.frame(age = cb$age, dur = cb$tripduration)
+
+ggplot(df, aes(x=age, y=dur)) +
+    geom_point(shape=1) +  geom_smooth(method=lm, se=FALSE) + ylim(0, 15000)
+
+rideDur <- lm(cb$tripduration ~ cb$age)
+print(rideDur)
+```
