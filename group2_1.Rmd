@@ -1,0 +1,23 @@
+---
+title: "group2_1"
+author: "Michael Im"
+date: "February 18, 2017"
+output: html_document
+---
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(data.table)
+
+cb <- read.csv("citibike_new.csv") #CHANGE SO THAT IT FITS THE MERGED FILE
+
+#function count number of start times and end times and then find difference
+ride_volume <- function(time){
+  starts <- nrows(subset(cb, cb$starttime_time <= time))
+  ends <- nrows(subset(cb, cb$stoptime_time <= time))
+  volume <- starts - ends
+  volume
+}
+```
