@@ -1,0 +1,29 @@
+---
+title: "group1"
+author: "Michael Im"
+date: "February 18, 2017"
+output: html_document
+---
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(data.table)
+
+cb <- read.csv("citibike.csv") #CHANGE SO THAT IT FITS THE MERGED FILE
+
+#need to separate the space in the starttime and endtime to get the time and date columns separate
+#strsplit(x, " ")
+x1 <- cb$starttime
+x2 <- as.character(x1)
+x2 <- c(x2)
+x3 <- read.table(text = x2, sep = " ", colClasses = "character")
+cb$starttime_date = x3$V1
+cb$starttime_time = x3$V2 #times are in character now
+cb$starttime_time = gsub(':', '', cb$starttime_time) #removes the ':' from times
+cb$starttime_time = as.numeric(cb$starttime_time) #makes times numbers
+
+write.csv(cb, file = "citibike_new.csv")
+
+```
