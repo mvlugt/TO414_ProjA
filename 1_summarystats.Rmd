@@ -1,0 +1,58 @@
+---
+title: "1_summarystats"
+author: "Evan Fisher"
+date: "February 18, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+
+##calculate stats
+
+average.duration = mean(cb$tripduration)
+median.duration = median(cb$tripduration)
+shortest.duration = min(cb$tripduration)
+longest.duration = max(cb$tripduration)
+
+#make function for finding the most popular station
+getmode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+pop.station = getmode(cb$start.station.name)
+
+##print stats
+cat(paste(" The average trip duration is: ", average.duration, " seconds\n",
+      "The median trip duration is: ", median.duration, " seconds\n",
+      "The shortest trip taken was: ", shortest.duration, " seconds\n",
+      "The longest trip taken was: ", longest.duration, " seconds\n",
+      "The most popular start station is: ", pop.station))
+
+
+##summary stats of user demographics
+count.male = nrow(subset(cb, gender == 1))
+count.female = nrow(subset(cb, gender == 2))
+count.unspecified = nrow(subset(cb, gender == 0))
+
+##make pie chart showing gender breakdown
+slices <- c(count.male, count.female, count.unspecified)
+lbls <- c("Male", "Female", "Unspecified")
+pie(slices, labels = lbls, main = "Gender Breakdown")
+
+##descriptive stats by gender
+barplot(tapply(cb$tripduration, cb$gender, mean), names.arg = c("Unspecified", "Male", "Female"),ylim = c(0,2000))
+
+
+
+```
+
+
+
+
