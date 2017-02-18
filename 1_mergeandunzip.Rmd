@@ -1,0 +1,192 @@
+---
+title: "1_downloadandmerge"
+author: "Evan Fisher"
+date: "February 18, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+
+##download all data, unzip, and merge
+
+temp <- tempfile()
+download.file("https://s3.amazonaws.com/tripdata/201601-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201601-citibike-tripdata.csv")
+data1 <- read.csv("201601-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201602-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201602-citibike-tripdata.csv")
+data2 <- read.csv("201602-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201603-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201603-citibike-tripdata.csv")
+data3 <- read.csv("201603-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201604-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201604-citibike-tripdata.csv")
+data4 <- read.csv("201604-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201605-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201605-citibike-tripdata.csv")
+data5 <- read.csv("201605-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201606-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201606-citibike-tripdata.csv")
+data6 <- read.csv("201606-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201607-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201607-citibike-tripdata.csv")
+data7 <- read.csv("201607-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201608-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201608-citibike-tripdata.csv")
+data8 <- read.csv("201608-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201609-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201609-citibike-tripdata.csv")
+data9 <- read.csv("201609-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201610-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201610-citibike-tripdata.csv")
+data10 <- read.csv("201610-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201611-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201611-citibike-tripdata.csv")
+data11 <- read.csv("201611-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201612-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201612-citibike-tripdata.csv")
+data12 <- read.csv("201612-citibike-tripdata.csv")
+
+#determine how many rows to take for sample
+#take random samples from all data sets
+num.rows = nrow(data1) * 0.005
+data1.small <- data1[sample(nrow(data1), round(num.rows)), ]
+
+num.rows = nrow(data2) * 0.005
+data2.small <- data2[sample(nrow(data2), round(num.rows)), ]
+
+num.rows = nrow(data3) * 0.005
+data3.small <- data3[sample(nrow(data3), round(num.rows)), ]
+
+num.rows = nrow(data4) * 0.005
+data4.small <- data4[sample(nrow(data4), round(num.rows)), ]
+
+num.rows = nrow(data5) * 0.005
+data5.small <- data5[sample(nrow(data5), round(num.rows)), ]
+
+num.rows = nrow(data6) * 0.005
+data6.small <- data6[sample(nrow(data6), round(num.rows)), ]
+
+num.rows = nrow(data7) * 0.005
+data7.small <- data7[sample(nrow(data7), round(num.rows)), ]
+
+num.rows = nrow(data8) * 0.005
+data8.small <- data8[sample(nrow(data8), round(num.rows)), ]
+
+num.rows = nrow(data9) * 0.005
+data9.small <- data9[sample(nrow(data9), round(num.rows)), ]
+
+num.rows = nrow(data10) * 0.005
+data10.small <- data10[sample(nrow(data10), round(num.rows)), ]
+
+num.rows = nrow(data11) * 0.005
+data11.small <- data11[sample(nrow(data11), round(num.rows)), ]
+
+num.rows = nrow(data12) * 0.005
+datasmall12 <- data12[sample(nrow(data12), round(num.rows)), ]
+
+
+#merge all data
+
+data.all <- merge(data1.small, data2.small, all = TRUE)
+data.all <- merge(data.all, data3.small, all = TRUE)
+data.all <- merge(data.all, data4.small, all = TRUE)
+data.all <- merge(data.all, data5.small, all = TRUE)
+data.all <- merge(data.all, data6.small, all = TRUE)##
+data.all <- merge(data.all, data7.small, all = TRUE)
+data.all <- merge(data.all, data8.small, all = TRUE)
+data.all <- merge(data.all, data9.small, all = TRUE)
+#data.all <- merge(data.all, data10.small, all = TRUE)
+#data.all <- merge(data.all, data11.small, all = TRUE)
+#data.all <- merge(data.all, data12.small, all = TRUE)
+
+
+cb <- data.all
+
+
+#need to separate the space in the starttime and endtime to get the time and date columns separate
+#strsplit(x, " ")
+x1 <- cb$starttime
+x2 <- as.character(x1)
+x2 <- c(x2)
+x3 <- read.table(text = x2, sep = " ", colClasses = "character")
+x4 <- x3$V1
+x5 <- read.table(text = x4, sep = "/", colClasses = "character")
+cb$starttime_date = paste(x5$V3, "-", x5$V1, "-", x5$V2, sep = "")
+cb$month = x5$V1
+cb$starttime_time = x3$V2 #times are in character now
+cb$starttime_time = gsub(':', '', cb$starttime_time) #removes the ':' from times
+cb$starttime_time = as.numeric(cb$starttime_time) #makes times numbers
+
+#same thing for stoptime
+x1 <- cb$stoptime
+x2 <- as.character(x1)
+x2 <- c(x2)
+x3 <- read.table(text = x2, sep = " ", colClasses = "character")
+x4 <- x3$V1
+x5 <- read.table(text = x4, sep = "/", colClasses = "character")
+cb$stoptime_date = paste(x5$V3, "-", x5$V1, "-", x5$V2, sep = "")
+cb$stoptime_time = x3$V2 #times are in character now
+cb$stoptime_time = gsub(':', '', cb$stoptime_time) #removes the ':' from times
+cb$stoptime_time = as.numeric(cb$stoptime_time) #makes times numbers
+
+
+##make new columns for time of day, day of week, month, season
+#time of day:
+calculateTime <- function(x) {
+  if(x < 120000) {
+    timeCategory <- "Morning"
+  } else if(x < 170000) {
+    timeCategory <- "Afternoon"
+  } else if(x <= 240000) {
+    timeCategory <- "Evening"
+  }
+  timeCategory
+}
+## create new column with time of day as factor
+cb$timeCategory <- sapply(cb$starttime_time, calculateTime)
+cb$timeCategory <- as.factor(cb$timeCategory)
+
+#day of week column
+cb$weekday = weekdays(as.Date(cb$starttime_date))
+
+#season
+calculateSeason <- function(x) {
+  if(x < 3) {
+    season <- "Winter"
+  } else if(x < 6) {
+    season <- "Spring"
+  } else if(x < 9) {
+    season <- "Summer"
+  } else if(x <= 12) {
+    season <- "Fall"
+  }
+  season
+}
+## create new column with time of day as factor
+cb$month <- as.integer(cb$month)
+cb$season <- sapply(cb$month, calculateSeason)
+cb$season <- as.factor(cb$season)
+
+
+write.csv(cb, file = "citibike_jan_sept_v1.csv")
+
+```
+
