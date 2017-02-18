@@ -24,6 +24,16 @@ cb$starttime_time = x3$V2 #times are in character now
 cb$starttime_time = gsub(':', '', cb$starttime_time) #removes the ':' from times
 cb$starttime_time = as.numeric(cb$starttime_time) #makes times numbers
 
+#same thing for stoptime
+x1 <- cb$stoptime
+x2 <- as.character(x1)
+x2 <- c(x2)
+x3 <- read.table(text = x2, sep = " ", colClasses = "character")
+cb$stoptime_date = x3$V1
+cb$stoptime_time = x3$V2 #times are in character now
+cb$stoptime_time = gsub(':', '', cb$starttime_time) #removes the ':' from times
+cb$stoptime_time = as.numeric(cb$starttime_time) #makes times numbers
+
 write.csv(cb, file = "citibike_new.csv")
 
 ```
