@@ -1,0 +1,59 @@
+---
+title: "PopularRoutes"
+author: "Mike"
+date: "2/19/2017"
+output: html_document
+---
+
+Idea 1: popular routes/start stations/end stations for subscribers compared to normal customers (Mike)
+Traffic mapping and coloring blue dots for subscribers and red dots as customers (ggmap) 
+Bar graph with beside and coloring of subscribers and customers for all the stations
+
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+
+cb <- read.csv("citibike_new.csv")
+
+findDifference <- function(sub, cus, searchId) {
+  newDf <- data.frame()
+  for(stationName in levels(sub[,searchId])) {
+    if (stationName %in% cus[,searchId]) {
+      dif <- nrow(subset(sub, sub[,searchId] == stationName)) - nrow(subset(cus, cus[,searchId] == stationName))
+      newDf <- rbind(newDf, data.frame(stationName, dif))
+    }
+  }
+  return(newDf)
+}
+
+top_n <- function(dataFrame) {
+  #Default to 20%
+  return(nrow(dataFrame) * .2)
+}
+
+cb$routes <- as.factor(paste(cb$start.station.name, cb$end.station.name, sep="+"))
+customer <- subset(cb, cb$usertype == "Customer")
+subscriber <- subset(cb, cb$usertype == "Subscriber")
+
+startDifferences <- findDifference(subscriber, customer, "start.station.name")
+endDifferences <- findDifference(subscriber, customer, "end.station.name")
+routeDifferences <- findDifference(subscriber, customer, "routes")
+
+
+topStartDifferences <- startDifferences[order(startDifferences$dif,decreasing=T)[1:top_n(startDifferences)],]
+topEndDifferences <- endDifferences[order(endDifferences$dif,decreasing=T)[1:top_n(endDifferences)],]
+
+#TODO: Route differences commented out for now
+#topRouteDifferences <- routeDifferences[order(routeDifferences$dif,decreasing=T)[1:top_n(routeDifferences)],]
+
+ggplot(data=topStartDifferences, aes(x=stationName, y=dif)) +
+  geom_bar(stat="identity", width=0.5) + coord_flip()
+ggplot(data=topEndDifferences, aes(x=stationName, y=dif)) +
+  geom_bar(stat="identity", width=0.5) + coord_flip()
+#ggplot(data=topRouteDifferences, aes(x=stationName, y=dif)) +
+  #geom_bar(stat="identity", width=0.5) + coord_flip()
+
+
+```
