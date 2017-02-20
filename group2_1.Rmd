@@ -11,7 +11,7 @@ library(dplyr)
 library(ggplot2)
 library(data.table)
 
-cb <- read.csv("citibike_new.csv") #CHANGE SO THAT IT FITS THE MERGED FILE
+cb <- read.csv("citibike_jan_sept_v1.csv") #CHANGE SO THAT IT FITS THE MERGED FILE
 
 ```
 
@@ -20,44 +20,47 @@ cb <- read.csv("citibike_new.csv") #CHANGE SO THAT IT FITS THE MERGED FILE
 
 #function count number of start times and end times and then find difference
 #TIME FUNCTION
-ride_volume <- function(time){
+ride_volume <- function(time, cb){
   volume <- nrow(subset(cb, cb$starttime_time <= time & cb$stoptime_time >= time))
   volume
 }
 
-
-
-cb$ride_volumes <- ride_volume(cb$starttime_time)
-
-hours <- c(100,130,200,230,300,330,400,430,500,530, 600,630,700,730,800,830,900,930,1000,1030,1100,1130,1200,1230,1300,1330,1400,1430,1500,1530,1600,1630,1700,1730,1800,1830,1900,1930,2000,2030,2100,2130,2200,2230,2300,2330,2400)
-
-volumes <- c(ride_volume(100),  ride_volume(130), ride_volume(200), ride_volume(230), ride_volume(300), ride_volume(330), ride_volume(400), ride_volume(430), ride_volume(500), ride_volume(530), ride_volume(600), ride_volume(630), ride_volume(700),ride_volume(730), ride_volume(800), ride_volume(830), ride_volume(900), ride_volume(930), ride_volume(1000),ride_volume(1030), ride_volume(1100), ride_volume(1130), ride_volume(1200), ride_volume(1230), ride_volume(1300), ride_volume(1330), ride_volume(1400), ride_volume(1430), ride_volume(1500), ride_volume(1530), ride_volume(1600),ride_volume(1630), ride_volume(1700), ride_volume(1730), ride_volume(1800), ride_volume(1830), ride_volume(1900), ride_volume(1930), ride_volume(2000),ride_volume(2030), ride_volume(2100), ride_volume(2130), ride_volume(2200), ride_volume(2230), ride_volume(2300),ride_volume(2330), ride_volume(2400))
+cb_sample <- sample_n(cb, 5000)
+hours <- c(10000,13000,20000,23000,30000,33000,40000,43000,50000,53000, 60000,63000,70000,73000,80000,83000,90000,93000,100000,103000,110000,113000,120000,123000,130000,133000,140000,143000,150000,153000,160000,163000,170000,173000,180000,183000,190000,193000,200000,203000,210000,213000,220000,223000,230000,233000,240000)
+#hours <- c("1am","130am", "2am", "230am", "3am", "330am","4am", "430am", "5am", "530am","6am","630am", "7am","730am", "8am","830am", "9am","930am", "10am","1030am", "11am","1130am" ,"12pm","1230pm" ,"1pm", "130pm","2pm", "230pm","3pm", "330pm","4pm", "430pm","5pm", "530pm","6pm","630pm","7pm","730pm","8pm","830pm","9pm","930pm","10pm","1030pm","11pm","1130pm","12am")
+volumes <- c(ride_volume(10000, cb_sample),  ride_volume(13000, cb_sample), ride_volume(20000, cb_sample), ride_volume(23000, cb_sample), ride_volume(30000, cb_sample), ride_volume(33000, cb_sample), ride_volume(40000, cb_sample), ride_volume(43000, cb_sample), ride_volume(50000, cb_sample), ride_volume(53000, cb_sample), ride_volume(60000, cb_sample), ride_volume(63000, cb_sample), ride_volume(70000, cb_sample),ride_volume(73000, cb_sample), ride_volume(80000, cb_sample), ride_volume(83000, cb_sample), ride_volume(90000, cb_sample), ride_volume(93000, cb_sample), ride_volume(100000, cb_sample),ride_volume(103000, cb_sample), ride_volume(110000, cb_sample), ride_volume(113000, cb_sample), ride_volume(120000, cb_sample), ride_volume(123000, cb_sample), ride_volume(130000, cb_sample), ride_volume(133000, cb_sample), ride_volume(140000, cb_sample), ride_volume(143000, cb_sample), ride_volume(150000, cb_sample), ride_volume(153000, cb_sample), ride_volume(160000, cb_sample),ride_volume(163000, cb_sample), ride_volume(170000, cb_sample), ride_volume(173000, cb_sample), ride_volume(180000, cb_sample), ride_volume(183000, cb_sample), ride_volume(190000, cb_sample), ride_volume(193000, cb_sample), ride_volume(200000, cb_sample),ride_volume(203000, cb_sample), ride_volume(210000, cb_sample), ride_volume(213000, cb_sample), ride_volume(220000, cb_sample), ride_volume(223000, cb_sample), ride_volume(230000, cb_sample),ride_volume(233000, cb_sample), ride_volume(240000, cb_sample))
 hour_volume <- data.frame(hours, volumes)
 
-plot(hour_volume)
-
-ggplot(data = hour_volume, aes(x = hour_volume$hours, y = hour_volume$volumes)) + geom_line() + labs(title = "Ride Volume Throughout Average Day", x = "Time of Day", y = "Ride Volume (numbers of bikers)")
-
-
-
+ggplot(data = hour_volume, aes(x = hour_volume$hours, y = hour_volume$volumes)) + geom_line() + labs(title = "Ride Volume Throughout Average Day", x = "Time of Day", y = "Ride Volume (numbers of bikers)") + scale_x_discrete(breaks=c(10000,13000,20000,23000,30000,33000,40000,43000,50000,53000, 60000,63000,70000,73000,80000,83000,90000,93000,100000,103000,110000,113000,120000,123000,130000,133000,140000,143000,150000,153000,160000,163000,170000,173000,180000,183000,190000,193000,200000,203000,210000,213000,220000,223000,230000,233000,240000),labels=c("1am","130am", "2am", "230am", "3am", "330am","4am", "430am", "5am", "530am","6am","630am", "7am","730am", "8am","830am", "9am","930am", "10am","1030am", "11am","1130am" ,"12pm","1230pm" ,"1pm", "130pm","2pm", "230pm","3pm", "330pm","4pm", "430pm","5pm", "530pm","6pm","630pm","7pm","730pm","8pm","830pm","9pm","930pm","10pm","1030pm","11pm","1130pm","12am"))
 
 ```
+
 
 ```{r}
 
 #DAY OF THE WEEK
-cb_sample <- sample_n(cb, 1000)
-#need bar graph and read from new csv file
-
-
+weekdays <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+cb$weekday <- as.character(cb$weekday)
+ride_volume2 <- function(weekday1, cb){
+  volume <- nrow(subset(cb, cb$weekday == weekday1))
+  volume
+}
+volumes <- c(ride_volume2("Sunday", cb_sample),  ride_volume2("Monday", cb_sample), ride_volume2("Tuesday", cb_sample), ride_volume2("Wednesday", cb_sample), ride_volume2("Thursday", cb_sample), ride_volume2("Friday", cb_sample), ride_volume2("Saturday", cb_sample)) 
+week_volume <- data.frame(weekdays, volumes)
+ggplot(data = week_volume, aes(x = week_volume$weekdays, y = week_volume$volumes)) + geom_point() + labs(title = "Ride Volume Throughout Week", x = "Day of Week", y = "Ride Volume (numbers of bikers)")
 ```
 
 
 ```{r}
 
 #month
-cb_sample <- sample_n(cb, 1000)
-#line graph and read from new csv file
-
+seasons <- c("Summer", "Spring", "Winter", "Fall")
+ride_volume3 <- function(season1, cb){
+  volume <- nrow(subset(cb, cb$season == season1))
+  volume
+}
+volumes <- c(ride_volume3("Summer", cb_sample),  ride_volume3("Spring", cb_sample), ride_volume3("Winter", cb_sample), ride_volume3("Fall", cb_sample)) 
+season_volume <- data.frame(seasons, volumes)
+ggplot(data = season_volume, aes(x = season_volume$seasons, y = season_volume$volumes)) + geom_point() + labs(title = "Ride Volume Throughout Seasons", x = "Season", y = "Ride Volume (numbers of bikers)")
 
 ```
