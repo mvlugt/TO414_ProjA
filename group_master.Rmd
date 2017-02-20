@@ -1,0 +1,168 @@
+---
+title: "group_master"
+author: "Michael Im"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(leaflet)
+cb <- read.csv("citibike_jan_sept_v1.csv")
+
+```
+
+#Question 1
+
+```{r}
+
+##calculate stats
+
+average.duration = mean(cb$tripduration)
+median.duration = median(cb$tripduration)
+shortest.duration = min(cb$tripduration)
+longest.duration = max(cb$tripduration)
+
+#make function for finding the most popular station
+getmode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+pop.station = getmode(cb$start.station.name)
+
+##print stats
+cat(paste(" The average trip duration is: ", average.duration, " seconds\n",
+      "The median trip duration is: ", median.duration, " seconds\n",
+      "The shortest trip taken was: ", shortest.duration, " seconds\n",
+      "The longest trip taken was: ", longest.duration, " seconds\n",
+      "The most popular start station is: ", pop.station))
+
+
+##summary stats of user demographics
+count.male = nrow(subset(cb, gender == 1))
+count.female = nrow(subset(cb, gender == 2))
+count.unspecified = nrow(subset(cb, gender == 0))
+
+##make pie chart showing gender breakdown
+slices <- c(count.male, count.female, count.unspecified)
+lbls <- c("Male", "Female", "Unspecified")
+pie(slices, labels = lbls, main = "Gender Breakdown")
+
+##descriptive stats by gender
+barplot(tapply(cb$tripduration, cb$gender, mean), names.arg = c("Unspecified", "Male", "Female"),ylim = c(0,2500))
+
+
+
+```
+
+#Question 2
+
+```{r}
+
+#function count number of start times and end times and then find difference
+#TIME FUNCTION
+ride_volume <- function(time, cb){
+  volume <- nrow(subset(cb, cb$starttime_time <= time & cb$stoptime_time >= time))
+  volume
+}
+
+cb_sample <- sample_n(cb, 5000)
+hours <- c(10000,13000,20000,23000,30000,33000,40000,43000,50000,53000, 60000,63000,70000,73000,80000,83000,90000,93000,100000,103000,110000,113000,120000,123000,130000,133000,140000,143000,150000,153000,160000,163000,170000,173000,180000,183000,190000,193000,200000,203000,210000,213000,220000,223000,230000,233000,240000)
+#hours <- c("1am","130am", "2am", "230am", "3am", "330am","4am", "430am", "5am", "530am","6am","630am", "7am","730am", "8am","830am", "9am","930am", "10am","1030am", "11am","1130am" ,"12pm","1230pm" ,"1pm", "130pm","2pm", "230pm","3pm", "330pm","4pm", "430pm","5pm", "530pm","6pm","630pm","7pm","730pm","8pm","830pm","9pm","930pm","10pm","1030pm","11pm","1130pm","12am")
+volumes <- c(ride_volume(10000, cb_sample),  ride_volume(13000, cb_sample), ride_volume(20000, cb_sample), ride_volume(23000, cb_sample), ride_volume(30000, cb_sample), ride_volume(33000, cb_sample), ride_volume(40000, cb_sample), ride_volume(43000, cb_sample), ride_volume(50000, cb_sample), ride_volume(53000, cb_sample), ride_volume(60000, cb_sample), ride_volume(63000, cb_sample), ride_volume(70000, cb_sample),ride_volume(73000, cb_sample), ride_volume(80000, cb_sample), ride_volume(83000, cb_sample), ride_volume(90000, cb_sample), ride_volume(93000, cb_sample), ride_volume(100000, cb_sample),ride_volume(103000, cb_sample), ride_volume(110000, cb_sample), ride_volume(113000, cb_sample), ride_volume(120000, cb_sample), ride_volume(123000, cb_sample), ride_volume(130000, cb_sample), ride_volume(133000, cb_sample), ride_volume(140000, cb_sample), ride_volume(143000, cb_sample), ride_volume(150000, cb_sample), ride_volume(153000, cb_sample), ride_volume(160000, cb_sample),ride_volume(163000, cb_sample), ride_volume(170000, cb_sample), ride_volume(173000, cb_sample), ride_volume(180000, cb_sample), ride_volume(183000, cb_sample), ride_volume(190000, cb_sample), ride_volume(193000, cb_sample), ride_volume(200000, cb_sample),ride_volume(203000, cb_sample), ride_volume(210000, cb_sample), ride_volume(213000, cb_sample), ride_volume(220000, cb_sample), ride_volume(223000, cb_sample), ride_volume(230000, cb_sample),ride_volume(233000, cb_sample), ride_volume(240000, cb_sample))
+hour_volume <- data.frame(hours, volumes)
+
+ggplot(data = hour_volume, aes(x = hour_volume$hours, y = hour_volume$volumes)) + geom_line() + labs(title = "Ride Volume Throughout Average Day", x = "Time of Day", y = "Ride Volume (numbers of bikers)") + scale_x_discrete(breaks=c(10000,13000,20000,23000,30000,33000,40000,43000,50000,53000, 60000,63000,70000,73000,80000,83000,90000,93000,100000,103000,110000,113000,120000,123000,130000,133000,140000,143000,150000,153000,160000,163000,170000,173000,180000,183000,190000,193000,200000,203000,210000,213000,220000,223000,230000,233000,240000),labels=c("1am","130am", "2am", "230am", "3am", "330am","4am", "430am", "5am", "530am","6am","630am", "7am","730am", "8am","830am", "9am","930am", "10am","1030am", "11am","1130am" ,"12pm","1230pm" ,"1pm", "130pm","2pm", "230pm","3pm", "330pm","4pm", "430pm","5pm", "530pm","6pm","630pm","7pm","730pm","8pm","830pm","9pm","930pm","10pm","1030pm","11pm","1130pm","12am"))
+
+
+#DAY OF THE WEEK
+weekdays <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
+cb$weekday <- as.character(cb$weekday)
+ride_volume2 <- function(weekday1, cb){
+  volume <- nrow(subset(cb, cb$weekday == weekday1))
+  volume
+}
+volumes <- c(ride_volume2("Sunday", cb_sample),  ride_volume2("Monday", cb_sample), ride_volume2("Tuesday", cb_sample), ride_volume2("Wednesday", cb_sample), ride_volume2("Thursday", cb_sample), ride_volume2("Friday", cb_sample), ride_volume2("Saturday", cb_sample)) 
+week_volume <- data.frame(weekdays, volumes)
+ggplot(data = week_volume, aes(x = week_volume$weekdays, y = week_volume$volumes)) + geom_point() + labs(title = "Ride Volume Throughout Week", x = "Day of Week", y = "Ride Volume (numbers of bikers)")
+
+
+#month
+seasons <- c("Summer", "Spring", "Winter", "Fall")
+ride_volume3 <- function(season1, cb){
+  volume <- nrow(subset(cb, cb$season == season1))
+  volume
+}
+volumes <- c(ride_volume3("Summer", cb_sample),  ride_volume3("Spring", cb_sample), ride_volume3("Winter", cb_sample), ride_volume3("Fall", cb_sample)) 
+season_volume <- data.frame(seasons, volumes)
+ggplot(data = season_volume, aes(x = season_volume$seasons, y = season_volume$volumes)) + geom_point() + labs(title = "Ride Volume Throughout Seasons", x = "Season", y = "Ride Volume (numbers of bikers)")
+
+```
+
+
+#Question 3
+
+```{r}
+
+library(leaflet)
+
+cb_sample <- sample_n(cb, 5000)
+
+leaflet(data = cb_sample) %>% addTiles() %>%
+  addMarkers(~cb_sample$end.station.longitude, ~cb_sample$start.station.latitude, popup = ~cb_sample$start.station.name, clusterOptions = markerClusterOptions()) %>%   addProviderTiles("CartoDB.Positron")
+
+```
+
+#Question 4
+
+```{r}
+
+cb_sample <- sample_n(cb, 50000)
+
+subscribers <- subset(cb_sample, cb_sample$usertype == "Subscriber")
+subscribers$subscriber <- 1
+subscriber_count <- data.frame(tapply(subscribers$subscriber, subscribers$start.station.name, sum))
+
+subscriber_count <- na.omit(subscriber_count)
+names <- rownames(subscriber_count)
+rownames(subscriber_count) <- NULL
+subscriber_count <- cbind(names, subscriber_count)
+colnames(subscriber_count) <- c("station.name", "subscribers")
+
+subscriber_count$lat <- cb_sample$start.station.latitude[subscriber_count$station.name]
+subscriber_count$lng <- cb_sample$start.station.longitude[subscriber_count$station.name]
+
+
+leaflet(subscriber_count) %>% addTiles() %>%
+  addCircles(lng = ~subscriber_count$lng, lat = ~subscriber_count$lat, weight = 1,
+    radius = ~subscriber_count$subscribers, popup = paste(subscriber_count$station.name, "<br/>", "Subscribers: ",subscriber_count$subscribers)
+  ) %>%   addProviderTiles("CartoDB.Positron")
+
+```
+
+#Question 5
+
+```{r}
+
+cb_sample <- sample_n(cb, 100)
+
+duration_averages <- data.frame(tapply(cb_sample$tripduration, cb_sample$start.station.name, mean, na.rm = TRUE))
+duration_averages <- na.omit(duration_averages)
+names <- rownames(duration_averages)
+rownames(duration_averages) <- NULL
+duration_averages <- cbind(names, duration_averages)
+colnames(duration_averages) <- c("station.name", "average.duration")
+duration_averages$lat <- cb_sample$start.station.latitude[duration_averages$station.name]
+duration_averages$lng <- cb_sample$start.station.longitude[duration_averages$station.name]
+
+leaflet(duration_averages) %>% addTiles() %>%
+  addCircles(lng = ~duration_averages$lng, lat = ~duration_averages$lat, weight = 1,
+    radius = ~duration_averages$average.duration/2, popup =  paste(duration_averages$station.name, "<br/>", "Average Trip Duration: ", duration_averages$average.duration, " seconds")
+  ) %>%   addProviderTiles("CartoDB.Positron")
+
+
+```
+
