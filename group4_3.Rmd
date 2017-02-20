@@ -1,0 +1,42 @@
+---
+title: "group4_3"
+author: "Michael Im"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(leaflet)
+
+```
+
+
+```{r}
+
+cb <- read.csv("citibike_jan_sept_v1.csv")
+cb_sample <- sample_n(cb, 50000)
+
+subscribers <- subset(cb_sample, cb_sample$usertype == "Subscriber")
+subscribers$subscriber <- 1
+subscriber_count <- data.frame(tapply(subscribers$subscriber, subscribers$start.station.name, sum))
+
+subscriber_count <- na.omit(subscriber_count)
+names <- rownames(subscriber_count)
+rownames(subscriber_count) <- NULL
+subscriber_count <- cbind(names, subscriber_count)
+colnames(subscriber_count) <- c("station.name", "subscribers")
+
+subscriber_count$lat <- cb_sample$start.station.latitude[subscriber_count$station.name]
+subscriber_count$lng <- cb_sample$start.station.longitude[subscriber_count$station.name]
+
+
+leaflet(subscriber_count) %>% addTiles() %>%
+  addCircles(lng = ~subscriber_count$lng, lat = ~subscriber_count$lat, weight = 1,
+    radius = ~subscriber_count$subscribers, popup = paste(subscriber_count$station.name, "<br/>", "Subscribers: ",subscriber_count$subscribers)
+  ) %>%   addProviderTiles("CartoDB.Positron")
+
+
+```

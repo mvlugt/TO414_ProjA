@@ -1,0 +1,40 @@
+---
+title: "group5_1"
+author: "Michael Im"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(leaflet)
+
+```
+
+
+```{r}
+
+cb <- read.csv("citibike_jan_sept_v1.csv")
+cb_sample <- sample_n(cb, 100)
+
+duration_averages <- data.frame(tapply(cb_sample$tripduration, cb_sample$start.station.name, mean, na.rm = TRUE))
+duration_averages <- na.omit(duration_averages)
+names <- rownames(duration_averages)
+rownames(duration_averages) <- NULL
+duration_averages <- cbind(names, duration_averages)
+colnames(duration_averages) <- c("station.name", "average.duration")
+duration_averages$lat <- cb_sample$start.station.latitude[duration_averages$station.name]
+duration_averages$lng <- cb_sample$start.station.longitude[duration_averages$station.name]
+
+leaflet(duration_averages) %>% addTiles() %>%
+  addCircles(lng = ~duration_averages$lng, lat = ~duration_averages$lat, weight = 1,
+    radius = ~duration_averages$average.duration/2, popup = ~duration_averages$station.name
+  ) %>%   addProviderTiles("CartoDB.Positron")
+
+
+```
+
+
+

@@ -1,0 +1,61 @@
+---
+title: "Untitled"
+author: "Evan Fisher"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+##are certain bikes used more than others?
+
+##read in file
+cb <- read.csv("citibike_jan_sept_v1.csv")
+
+
+##isolate bike ids
+cb$bikeid <- as.factor(cb$bikeid)
+bike <- unique(cb$bikeid)
+
+bikedata <- data.frame(bike)
+
+library(dplyr)
+set.seed(1)
+bikedata <- data.frame(ID = cb$bikeid)
+bikedata <- bikedata %>% group_by(ID) %>% summarise(no_rows = length(ID))
+
+
+##display data
+barplot(bikedata$no_rows)
+
+boxplot(bikedata$no_rows, horizontal = TRUE, xlab="Number of Uses", main="Uses per Bike")
+
+```
+
+
+
+```{r}
+#count number of times bike is returned to start station
+sameStation = nrow(cb[cb$start.station.id == cb$end.station.id ,])
+differentStation = nrow(cb) - sameStation
+
+#display data
+slices <- c(sameStation, differentStation)
+lbls <- c("Same Station", "Different Station")
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct)
+lbls <- paste(lbls,"%",sep="")
+pie(slices, labels = lbls, main = "Bikes Returned to Same vs. Different Station")
+
+
+
+```
+
+
+
+
+
