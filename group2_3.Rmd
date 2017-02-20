@@ -1,0 +1,59 @@
+---
+title: "new file"
+author: "Don Chao"
+date: "February 18, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+cb <- read.csv("citibike_jan_sept_v1.csv")
+cb = as.data.frame(cb)
+
+longrides <- tapply(cb$tripduration, cb$start.station.name, mean)
+longrides2 <- tail(sort(longrides),20)
+
+
+longridesmorning <- subset(cb,cb$timeCategory=="Morning")
+longridesmorning2 <- tapply(longridesmorning$tripduration, longridesmorning$start.station.name, mean)
+longridesmorning2 <- tail(sort(longridesmorning2),20)
+longridesmorning2 = as.data.frame(longridesmorning2)
+longridesmorning2$longridesmorning2 <- factor(longridesmorning2$longridesmorning2, levels = longridesmorning2$longridesmorning2[order(longridesmorning2$longridesmorning2)])
+longridesmorning2$longridesmorning2 = as.numeric(longridesmorning2$longridesmorning2)
+rownamesmorning <- row.names(longridesmorning2)
+
+longridesevening <- subset(cb,cb$timeCategory=="Evening")
+longridesevening2 <- tapply(longridesevening$tripduration, longridesevening$start.station.name, mean)
+longridesevening2 <- tail(sort(longridesevening2),20)
+
+longridesevening2 = as.data.frame(longridesevening2)
+longridesevening2$longridesevening2 <- factor(longridesevening2$longridesevening2, levels = longridesevening2$longridesevening2[order(longridesevening2$longridesevening2)])
+longridesevening2$longridesevening2 = as.numeric(longridesevening2$longridesevening2)
+rownamesevening <- row.names(longridesevening2)
+
+longridesafternoon <- subset(cb,cb$timeCategory=="Afternoon")
+longridesafternoon2 <- tapply(longridesafternoon$tripduration, longridesafternoon$start.station.name, mean)
+longridesafternoon2 <- tail(sort(longridesafternoon2),20)
+View(longridesafternoon2)
+
+longridesafternoon2 = as.data.frame(longridesafternoon2)
+longridesafternoon2$longridesafternoon2 <- factor(longridesafternoon2$longridesafternoon2, levels = longridesafternoon2$longridesafternoon2[order(longridesafternoon2$longridesafternoon2)])
+longridesafternoon2$longridesafternoon2 = as.numeric(longridesafternoon2$longridesafternoon2)
+rownamesafternoon <- row.names(longridesafternoon2)
+
+#plotting graphs
+op <- par(mar = c(5,15,5,1) + 0.1)
+op2 <- par(mgp=c(2.5,1,0))
+barplot(longridesmorning2$longridesmorning2, names.arg = rownamesmorning, las=1, horiz=TRUE, main="Top 20 Longest Average Morning \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+
+barplot(longridesevening2$longridesevening2, names.arg = rownamesevening, las=1, horiz=TRUE, main="Top 20 Longest Average Evening \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+
+barplot(longridesafternoon2$longridesafternoon2, names.arg = rownamesafternoon, las=1, horiz=TRUE, main="Top 20 Longest Average Afternoon \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+par(op)
+par(op2)
+
+```
+
