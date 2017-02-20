@@ -1,0 +1,25 @@
+---
+title: "group regression"
+author: "Evan Fisher"
+date: "February 19, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+duration.large <- lm(cb$tripduration ~ cb$birth.year + cb$gender + cb$starttime_time + cb$season + cb$month + cb$weekday + cb$bikeid)
+
+summary(duration.large)
+
+duration.refined <- lm(cb$tripduration ~ cb$gender)
+
+summary(duration.refined)
+
+
+```
+
