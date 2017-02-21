@@ -2,7 +2,7 @@
 title: "group_master"
 author: "Michael Im"
 date: "February 19, 2017"
-output: html_document
+output:  html_document
 ---
 
 ```{r}
@@ -12,6 +12,7 @@ library(data.table)
 library(leaflet)
 library(futile.logger)
 library(grid)
+library(knitr)
 library(VennDiagram)
 cb <- read.csv("citibike_jan_sept_v1.csv")
 
@@ -107,7 +108,12 @@ season_volume <- data.frame(seasons, volumes)
 barplot(season_volume$volumes, names.arg = season_volume$seasons, las=2, ylim = c(0,2500), ylab = "Ride Volume (number of bikers)", main = "Ride Volume Throughout Seasons" )
 
 
+```
 
+###Question 2 Part C
+
+Below are the top 20 stations originating the longest trip durations, across all time frames.
+```{r,echo=FALSE}
 #Question 2 Part C
 
 cb = as.data.frame(cb)
@@ -145,20 +151,21 @@ longridesafternoon2$longridesafternoon2 <- factor(longridesafternoon2$longridesa
 longridesafternoon2$longridesafternoon2 = as.numeric(longridesafternoon2$longridesafternoon2)
 rownamesafternoon <- row.names(longridesafternoon2)
 
+```
+
+```{r,echo=FALSE}
 #plotting graphs
 op <- par(mar = c(5,15,5,1) + 0.1)
 op2 <- par(mgp=c(2.5,1,0))
 
 barplot(longrides2$longrides2, names.arg = rownamesall, las=1,horiz=TRUE, main= "Top 20 Longest Average \n Trip Durations by Station", xlab = "Average Trip Duration (1000s seconds)")
-
-barplot(longridesmorning2$longridesmorning2, names.arg = rownamesmorning, las=1, horiz=TRUE, main="Top 20 Longest Average Morning \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
-
-barplot(longridesevening2$longridesevening2, names.arg = rownamesevening, las=1, horiz=TRUE, main="Top 20 Longest Average Evening \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
-
-barplot(longridesafternoon2$longridesafternoon2, names.arg = rownamesafternoon, las=1, horiz=TRUE, main="Top 20 Longest Average Afternoon \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
 par(op)
 par(op2)
+```
 
+
+```{r,echo=FALSE}
+#data to calculate venn diagram below:
 rownamesall = as.factor(rownamesall)
 rownamesmorning = as.factor(rownamesmorning)
 rownamesevening = as.factor(rownamesevening)
@@ -225,7 +232,12 @@ eveningonly <- 20-morningNevening2 - eveningNafternoon2 - eveningNall2 - MENA2 -
 afternoononly <- 20 - morningNafternoon2 - eveningNafternoon2 - afternoonNall2 - MENA2 - MANAll2-EANAll2- ALLFOUR2
 #all only
 allonly <- 20- morningNall2 - eveningNall2 - afternoonNall2 - MENAll2 - MANAll2 - EANAll2- ALLFOUR2
+```
 
+This Venn diagram displays the overlaps between top 20 stations originating the longest trip druations, across time frames. We can clearly see that the top 20 stations changes significantly as the time of day changes.
+
+Some stations are only within the top 20 busiest stations list during a designated time frame (e.g., morning, evening, afternoon), whereas other stations are busy across multiple time frames (e.g., morning and afternoon). No stations are in the top 20 busiest stations list for the entire day (i.e., morning to afternoon to evening.
+```{r,echo=FALSE}
 venn.plot <- draw.quad.venn(20, 20, 20, 20, morningNafternoon2, morningNevening2, morningNall2, eveningNafternoon2, afternoonNall2,
 eveningNall2, MENA2, MANAll2, MENAll2, EANAll2, ALLFOUR2, category = c("Morning","Afternoon", "Evening", "All"), lwd = rep(2, 4), lty = rep("solid", 4), col =
 rep("black", 4), fill = c("blue","red","green","yellow"), alpha = rep(0.5, 4),
@@ -239,10 +251,49 @@ rep(list(c(0.5, 0.5)), 4), rotation.degree = 0,
 rotation.centre = c(0.5, 0.5), ind = TRUE, cex.prop =
 NULL, print.mode = "raw", sigdigs = 3, direct.area =
 FALSE, area.vector = 0)
+```
 
+
+
+Below we can compare the specific stations comprising the top 20 stations originating the longest rides, in each time frame.
+```{r,echo=FALSE}
+rownamesall <- rownamesall[order(rownamesall)]
+rownamesmorning <- rownamesmorning[order(rownamesmorning)]
+rownamesafternoon <- rownamesafternoon[order(rownamesafternoon)]
+rownamesevening <- rownamesevening[order(rownamesevening)]
+
+toptimesdf <- data.frame(rownamesall,rownamesmorning,rownamesafternoon, rownamesevening)
+
+names(toptimesdf)[names(toptimesdf)=="rownamesall"] <- "All data"
+names(toptimesdf)[names(toptimesdf)=="rownamesmorning"] <- "Morning data"
+names(toptimesdf)[names(toptimesdf)=="rownamesevening"] <- "Evening data"
+names(toptimesdf)[names(toptimesdf)=="rownamesafternoon"] <- "Afternoon data"
+
+
+
+toptimestable <-kable(toptimesdf, format = "markdown")
+
+toptimestable
 #NEED TO VERIFY THESE NUMBERS
+```
+
+In the below barcharts, we can see that the top 20 stations originating the longest trip durations generate similar distributions in average trip duration.
+
+
+```{r,echo=FALSE}
+op <- par(mar = c(5,15,5,1) + 0.1)
+op2 <- par(mgp=c(2.5,1,0))
+
+barplot(longridesmorning2$longridesmorning2, names.arg = rownamesmorning, las=1, horiz=TRUE, main="Top 20 Longest Average Morning \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+
+barplot(longridesevening2$longridesevening2, names.arg = rownamesevening, las=1, horiz=TRUE, main="Top 20 Longest Average Evening \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+
+barplot(longridesafternoon2$longridesafternoon2, names.arg = rownamesafternoon, las=1, horiz=TRUE, main="Top 20 Longest Average Afternoon \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+par(op)
+par(op2)
 
 ```
+
 
 
 #Question 3
