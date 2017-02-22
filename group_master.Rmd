@@ -25,6 +25,14 @@ cb <- read.csv("citibike_jan_sept_v1.csv")
 
 #Question 1
 
+Please see below for an overview of the statistics discovered:
+
+* The average trip duration is about 18 minutes
+* The most popular station is Pershing Square North
+* On average, females ride longer than males
+* Gender is the only variable that can significantly predict a customer's ride duration
+
+
 ```{r}
 
 ##calculate stats
@@ -63,6 +71,11 @@ pie(slices, labels = lbls, main = "Rider Gender Breakdown")
 ##descriptive stats by gender
 barplot(tapply(cb$tripduration, cb$gender, mean), names.arg = c("Unspecified", "Male", "Female"),ylim = c(0,2500), main="Trip Duration (seconds) by Reported Gender")
 
+##linear regression
+duration.large <- lm(cb$tripduration ~ cb$birth.year + cb$gender + cb$starttime_time + cb$season + cb$month + cb$weekday + cb$bikeid + cb$usertype)
+summary(duration.large)
+duration.refined <- lm(cb$tripduration ~ cb$gender)
+summary(duration.refined)
 
 
 ```
@@ -366,6 +379,48 @@ leaflet(subscriber_count) %>% addTiles() %>%
   addCircles(lng = ~subscriber_count$lng, lat = ~subscriber_count$lat, weight = 1,
     radius = ~subscriber_count$subscribers, popup = paste(subscriber_count$station.name, "<br/>", "Subscribers: ",subscriber_count$subscribers)
   ) %>%   addProviderTiles("CartoDB.Positron")
+
+```
+
+##Are Certain Bikes Used More?
+### Yes - there is quite a large range
+
+```{r}
+##isolate bike ids
+cb$bikeid <- as.factor(cb$bikeid)
+bike <- unique(cb$bikeid)
+
+bikedata <- data.frame(bike)
+
+library(dplyr)
+set.seed(1)
+bikedata <- data.frame(ID = cb$bikeid)
+bikedata <- bikedata %>% group_by(ID) %>% summarise(no_rows = length(ID))
+
+
+
+##display data
+barplot(bikedata$no_rows)
+
+boxplot(bikedata$no_rows, horizontal = TRUE, xlab="Number of Uses", main="Uses per Bike")
+
+```
+
+##Are Most Bikes Returned to Their Start Station?
+###No - in fact, 98% of bikes are returned to a different station
+
+```{r}
+#count number of times bike is returned to start station
+sameStation = nrow(cb[cb$start.station.id == cb$end.station.id ,])
+differentStation = nrow(cb) - sameStation
+
+#display data
+slices <- c(sameStation, differentStation)
+lbls <- c("Same Station", "Different Station")
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct)
+lbls <- paste(lbls,"%",sep="")
+pie(slices, labels = lbls, main = "Bikes Returned to Same vs. Different Station")
 
 ```
 
