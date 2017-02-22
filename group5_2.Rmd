@@ -1,0 +1,64 @@
+---
+title: "group5_2"
+author: ""
+date: "February 20, 2017"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(leaflet)
+
+```
+
+
+```{r}
+
+cb <- read.csv("citibike_jan_sept_v1.csv")
+#cb_sample <- sample_n(cb, 100)
+
+t <- table(cb$start.station.name)
+w <- as.data.frame(t)
+
+t2 <- table(cb$end.station.name)
+w2 <- as.data.frame(t2)
+
+t3 <- table(cb$start.station.latitude)
+w3 <- as.data.frame(t3)
+
+#w <- as.data.frame(w)
+#w2 <- as.data.frame(w2)
+
+merged_w_w2 <- full_join(w,w2, by = "Var1")
+colnames(merged_w_w2) <- c("start.station.name", "Freq.x", "Freq.y")
+merged_w_w2 <- as.data.frame(merged_w_w2)
+merged_w_w2$Freq_dif <- merged_w_w2$Freq.x - merged_w_w2$Freq.y
+mergedWithLat <- merge(merged_w_w2, cb, by = intersect("start.station.name", "start.station.name"))
+
+
+
+
+merged_w_w2[which.max(merged_w_w2$Freq_dif),] #Max
+merged_w_w2[which.min(merged_w_w2$Freq_dif),] #Min
+
+top_n <- function(dataFrame) {
+  #Default to 20%
+  return(nrow(dataFrame) * .2)
+}
+colors("Blue")
+color <- function(val) {
+  return(ifelse(val>=0,"navy","red"))
+}
+mergedWithLat["color"] <- color(mergedWithLat$Freq_dif)
+
+start <- merged_w_w2[order(merged_w_w2$Freq_dif,decreasing=T)[1:top_n(merged_w_w2)],]
+end <- merged_w_w2[order(merged_w_w2$Freq_dif,decreasing=F)[1:top_n(merged_w_w2)],]
+
+leaflet(mergedWithLat) %>% addTiles() %>%
+  addCircles(lng = ~mergedWithLat$start.station.longitude, lat = ~mergedWithLat$start.station.latitude, weight = 1,
+    radius = ~abs(mergedWithLat$Freq_dif)/2, popup = ~mergedWithLat$Freq_dif, color = ~mergedWithLat$color
+  ) %>%   addProviderTiles("CartoDB.Positron")
+
+```
