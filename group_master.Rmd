@@ -296,6 +296,11 @@ FALSE, area.vector = 0)
 
 ```
 
+##Popular Start and Stop Stations For Subscribers vs Customers
+
+Ours graphs indicate that at least 10% of the stations have a substantial difference between subscribers versus customers. For both start station and end station, Pershing Square North has the largest difference at 60. We recommend focusing efforts around improving subscriber experience at these stations that attract more subscribers than customers. 
+
+
 ```{r}
 #Question 2 Part D
 
@@ -311,8 +316,7 @@ findDifference <- function(sub, cus, searchId) {
 }
 
 top_n <- function(dataFrame) {
-  #Default to 20%
-  return(nrow(dataFrame) * .05)
+  return(nrow(dataFrame) * .1)
 }
 
 cb$routes <- as.factor(paste(cb$start.station.name, cb$end.station.name, sep="+"))
@@ -326,9 +330,9 @@ topStartDifferences <- startDifferences[order(startDifferences$dif,decreasing=T)
 topEndDifferences <- endDifferences[order(endDifferences$dif,decreasing=T)[1:top_n(endDifferences)],]
 
 ggplot(data=topStartDifferences, aes(x=stationName, y=dif)) +
-  geom_bar(stat="identity", width=0.5) + coord_flip() + labs(x="Station Name",y="Difference")
+  geom_bar(stat="identity", width=0.5) + coord_flip() + labs(x="Station Name",y="Difference") + ggtitle("Subscribers vs. Customers at Start Stations")
 ggplot(data=topEndDifferences, aes(x=stationName, y=dif)) +
-  geom_bar(stat="identity", width=0.5) + coord_flip() + labs(x="Station Name",y="Difference")
+  geom_bar(stat="identity", width=0.5) + coord_flip() + labs(x="Station Name",y="Difference") + ggtitle("Subscribers vs. Customers at End Stations")
 
 
 ```
