@@ -402,15 +402,28 @@ leaflet(duration_averages) %>% addTiles() %>%
 * There are multiple stations that also seem to be good spots for commuting with many of them appearing close to the water.
 * Most of the stations in the heart of Downtown and Midtown appear to be places where people take out bikes to move only for a few blocks.
 
-#Extra Visualization of the Data
-
 ```{r}
 
-library(leaflet)
-
-cb_sample <- sample_n(cb, 5000)
+cb_sample <- sample_n(cb, 30000)
 
 leaflet(data = cb_sample) %>% addTiles() %>%
   addMarkers(~cb_sample$end.station.longitude, ~cb_sample$start.station.latitude, popup = ~cb_sample$start.station.name, clusterOptions = markerClusterOptions()) %>%   addProviderTiles("CartoDB.Positron")
 
 ```
+
+##Popularity of Bikes by Region
+
+###How Visual Works
+
+* Numbers in Circles = Each number represents the number of users who have taken a bike in that region
+  + Hovering over that region allows you to see the outline of the region in question.
+  + Clicking that region will segment that region to give you sub-regions (you can repeat that process by clicking those regions).
+  
+###Insights from Map
+
+* We invite you to keep interacting with this map to find useful data on which regions are the most popular.
+  + Obvious trend that Downtown and Midtown have the most traffic while Brooklyn and Queens had less.
+
+
+
+
