@@ -296,6 +296,58 @@ FALSE, area.vector = 0)
 
 ```
 
+```{r}
+#Question 2 Part D
+
+findDifference <- function(sub, cus, searchId) {
+  newDf <- data.frame()
+  for(stationName in levels(sub[,searchId])) {
+    if (stationName %in% cus[,searchId]) {
+      dif <- nrow(subset(sub, sub[,searchId] == stationName)) - nrow(subset(cus, cus[,searchId] == stationName))
+      newDf <- rbind(newDf, data.frame(stationName, dif))
+    }
+  }
+  return(newDf)
+}
+
+top_n <- function(dataFrame) {
+  #Default to 20%
+  return(nrow(dataFrame) * .05)
+}
+
+cb$routes <- as.factor(paste(cb$start.station.name, cb$end.station.name, sep="+"))
+customer <- subset(cb, cb$usertype == "Customer")
+subscriber <- subset(cb, cb$usertype == "Subscriber")
+
+startDifferences <- findDifference(subscriber, customer, "start.station.name")
+endDifferences <- findDifference(subscriber, customer, "end.station.name")
+
+topStartDifferences <- startDifferences[order(startDifferences$dif,decreasing=T)[1:top_n(startDifferences)],]
+topEndDifferences <- endDifferences[order(endDifferences$dif,decreasing=T)[1:top_n(endDifferences)],]
+
+ggplot(data=topStartDifferences, aes(x=stationName, y=dif)) +
+  geom_bar(stat="identity", width=0.5) + coord_flip() + labs(x="Station Name",y="Difference")
+ggplot(data=topEndDifferences, aes(x=stationName, y=dif)) +
+  geom_bar(stat="identity", width=0.5) + coord_flip() + labs(x="Station Name",y="Difference")
+
+
+```
+
+```{r}
+#Question 2 Part E
+
+#Linear regression with ride duration being the dependent variable
+cb$age <- (2017 - cb$birth.year)
+rideDur <- lm(cb$tripduration ~ cb$age)
+df <- data.frame(age = cb$age, dur = cb$tripduration)
+
+ggplot(df, aes(x=age, y=dur)) +
+    geom_point(shape=1) +  geom_smooth(method=lm, se=FALSE) + ylim(0, 15000) + xlim(18, 85)
+
+rideDur <- lm(cb$tripduration ~ cb$age)
+summary(rideDur)
+```
+
 
 #Question 3
 
@@ -470,7 +522,36 @@ leaflet(duration_averages) %>% addTiles() %>%
 
 ```
 
+```{r}
+top_n <- function(dataFrame) {
+  #Default to 20%
+  return(nrow(dataFrame) * .2)
+}
+color <- function(val) {
+  return(ifelse(val>=0,"navy","red"))
+}
 
+t <- table(cb$start.station.name)
+w <- as.data.frame(t)
+t2 <- table(cb$end.station.name)
+w2 <- as.data.frame(t2)
+t3 <- table(cb$start.station.latitude)
+w3 <- as.data.frame(t3)
+
+merged_w_w2 <- full_join(w,w2, by = "Var1")
+colnames(merged_w_w2) <- c("start.station.name", "Freq.x", "Freq.y")
+merged_w_w2 <- as.data.frame(merged_w_w2)
+merged_w_w2$Freq_dif <- merged_w_w2$Freq.x - merged_w_w2$Freq.y
+
+mergedWithLat <- merge(merged_w_w2, cb, by = intersect("start.station.name", "start.station.name"))
+mergedWithLat["color"] <- color(mergedWithLat$Freq_dif)
+
+leaflet(mergedWithLat) %>% addTiles() %>%
+  addCircles(lng = ~mergedWithLat$start.station.longitude, lat = ~mergedWithLat$start.station.latitude, weight = 1,
+    radius = ~abs(mergedWithLat$Freq_dif)/2, popup = ~mergedWithLat$Freq_dif, color = ~mergedWithLat$color
+  ) %>%   addProviderTiles("CartoDB.Positron")
+
+```
 
 
 
