@@ -2,7 +2,13 @@
 title: "group_master"
 author: "Michael Im"
 date: "February 19, 2017"
-output: html_document
+output: 
+  html_document: 
+    theme: united
+    toc: yes
+    number_sections: TRUE
+    toc_float:
+      collapsed: FALSE
 ---
 
 ```{r}
@@ -10,11 +16,22 @@ library(dplyr)
 library(ggplot2)
 library(data.table)
 library(leaflet)
+library(futile.logger)
+library(grid)
+library(VennDiagram)
 cb <- read.csv("citibike_jan_sept_v1.csv")
 
 ```
 
 #Question 1
+
+Please see below for an overview of the statistics discovered:
+
+* The average trip duration is about 18 minutes
+* The most popular station is Pershing Square North
+* On average, females ride longer than males
+* Gender is the only variable that can significantly predict a customer's ride duration
+
 
 ```{r}
 
@@ -49,16 +66,37 @@ count.unspecified = nrow(subset(cb, gender == 0))
 ##make pie chart showing gender breakdown
 slices <- c(count.male, count.female, count.unspecified)
 lbls <- c("Male", "Female", "Unspecified")
-pie(slices, labels = lbls, main = "Gender Breakdown")
+pie(slices, labels = lbls, main = "Rider Gender Breakdown")
 
 ##descriptive stats by gender
-barplot(tapply(cb$tripduration, cb$gender, mean), names.arg = c("Unspecified", "Male", "Female"),ylim = c(0,2500))
+barplot(tapply(cb$tripduration, cb$gender, mean), names.arg = c("Unspecified", "Male", "Female"),ylim = c(0,2500), main="Trip Duration (seconds) by Reported Gender")
 
+##linear regression
+duration.large <- lm(cb$tripduration ~ cb$birth.year + cb$gender + cb$starttime_time + cb$season + cb$month + cb$weekday + cb$bikeid + cb$usertype)
+summary(duration.large)
+duration.refined <- lm(cb$tripduration ~ cb$gender)
+summary(duration.refined)
 
 
 ```
 
 #Question 2
+
+Identify patterns in the ride history data. Explain these patterns using appropriate visualization. A few potential patterns are (this is an illustrative list, you should formulate your own patterns as well to be explored here):
+
+* How does ride volume change with time of day, day of the week, month of year?
+* Which stations see the most asymmetric traffic (more arrivals than departures and vice versa)? Does this change with time of day and day of the week?
+* Which stations originate the longest rides? Does this change as we go through different times of the day?
+
+##Ride Volume Data based on Time of Day
+
+As you can see from the data, there are several peak times in the tide volume throughout a normal day. These peak times represent the morning and evening rush hours to and from work.
+
+* Morning Rush - 8:00 AM to 10:00 AM (peaking at 9:00 AM)
+
+* Evening Rush - 4:00 pm to 7:00 PM (peaking at 6:00 PM)
+
+Also, note that average ride volume is the highest between the two rush hours (so in the afternoon), and there are very few bikers out between 10:00 PM and 6:00 AM.
 
 ```{r}
 
@@ -69,14 +107,21 @@ ride_volume <- function(time, cb){
   volume
 }
 
-cb_sample <- sample_n(cb, 5000)
+cb_sample <- sample_n(cb, 50000)
 hours <- c(10000,13000,20000,23000,30000,33000,40000,43000,50000,53000, 60000,63000,70000,73000,80000,83000,90000,93000,100000,103000,110000,113000,120000,123000,130000,133000,140000,143000,150000,153000,160000,163000,170000,173000,180000,183000,190000,193000,200000,203000,210000,213000,220000,223000,230000,233000,240000)
 #hours <- c("1am","130am", "2am", "230am", "3am", "330am","4am", "430am", "5am", "530am","6am","630am", "7am","730am", "8am","830am", "9am","930am", "10am","1030am", "11am","1130am" ,"12pm","1230pm" ,"1pm", "130pm","2pm", "230pm","3pm", "330pm","4pm", "430pm","5pm", "530pm","6pm","630pm","7pm","730pm","8pm","830pm","9pm","930pm","10pm","1030pm","11pm","1130pm","12am")
 volumes <- c(ride_volume(10000, cb_sample),  ride_volume(13000, cb_sample), ride_volume(20000, cb_sample), ride_volume(23000, cb_sample), ride_volume(30000, cb_sample), ride_volume(33000, cb_sample), ride_volume(40000, cb_sample), ride_volume(43000, cb_sample), ride_volume(50000, cb_sample), ride_volume(53000, cb_sample), ride_volume(60000, cb_sample), ride_volume(63000, cb_sample), ride_volume(70000, cb_sample),ride_volume(73000, cb_sample), ride_volume(80000, cb_sample), ride_volume(83000, cb_sample), ride_volume(90000, cb_sample), ride_volume(93000, cb_sample), ride_volume(100000, cb_sample),ride_volume(103000, cb_sample), ride_volume(110000, cb_sample), ride_volume(113000, cb_sample), ride_volume(120000, cb_sample), ride_volume(123000, cb_sample), ride_volume(130000, cb_sample), ride_volume(133000, cb_sample), ride_volume(140000, cb_sample), ride_volume(143000, cb_sample), ride_volume(150000, cb_sample), ride_volume(153000, cb_sample), ride_volume(160000, cb_sample),ride_volume(163000, cb_sample), ride_volume(170000, cb_sample), ride_volume(173000, cb_sample), ride_volume(180000, cb_sample), ride_volume(183000, cb_sample), ride_volume(190000, cb_sample), ride_volume(193000, cb_sample), ride_volume(200000, cb_sample),ride_volume(203000, cb_sample), ride_volume(210000, cb_sample), ride_volume(213000, cb_sample), ride_volume(220000, cb_sample), ride_volume(223000, cb_sample), ride_volume(230000, cb_sample),ride_volume(233000, cb_sample), ride_volume(240000, cb_sample))
 hour_volume <- data.frame(hours, volumes)
 
-ggplot(data = hour_volume, aes(x = hour_volume$hours, y = hour_volume$volumes)) + geom_line() + labs(title = "Ride Volume Throughout Average Day", x = "Time of Day", y = "Ride Volume (numbers of bikers)") + scale_x_discrete(breaks=c(10000,13000,20000,23000,30000,33000,40000,43000,50000,53000, 60000,63000,70000,73000,80000,83000,90000,93000,100000,103000,110000,113000,120000,123000,130000,133000,140000,143000,150000,153000,160000,163000,170000,173000,180000,183000,190000,193000,200000,203000,210000,213000,220000,223000,230000,233000,240000),labels=c("1am","130am", "2am", "230am", "3am", "330am","4am", "430am", "5am", "530am","6am","630am", "7am","730am", "8am","830am", "9am","930am", "10am","1030am", "11am","1130am" ,"12pm","1230pm" ,"1pm", "130pm","2pm", "230pm","3pm", "330pm","4pm", "430pm","5pm", "530pm","6pm","630pm","7pm","730pm","8pm","830pm","9pm","930pm","10pm","1030pm","11pm","1130pm","12am"))
+ggplot(data = hour_volume, aes(x = hour_volume$hours, y = hour_volume$volumes)) + geom_line() + labs(title = "Ride Volume Throughout Average Day", x = "Time of Day", y = "Ride Volume (numbers of bikers)") + scale_x_continuous(breaks=seq(20000,240000,20000),labels=c( "2am","4am","6am", "8am", "10am","12pm","2pm", "4pm","6pm","8pm","10pm","12am")) + theme(axis.title.x = element_text(vjust=0))
 
+```
+
+##Ride Volume Data based on Day of the Week
+
+It is clear that users are more likely to use bikes during the work week rather than the weekend. Therefore, problems such as shortage of bikes are more likely to occur during the work week (especially on days like Tuesday through Thursdays, which are more in the middle of the work week).
+
+```{r}
 
 #DAY OF THE WEEK
 weekdays <- c("Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday")
@@ -87,8 +132,18 @@ ride_volume2 <- function(weekday1, cb){
 }
 volumes <- c(ride_volume2("Sunday", cb_sample),  ride_volume2("Monday", cb_sample), ride_volume2("Tuesday", cb_sample), ride_volume2("Wednesday", cb_sample), ride_volume2("Thursday", cb_sample), ride_volume2("Friday", cb_sample), ride_volume2("Saturday", cb_sample)) 
 week_volume <- data.frame(weekdays, volumes)
-ggplot(data = week_volume, aes(x = week_volume$weekdays, y = week_volume$volumes)) + geom_point() + labs(title = "Ride Volume Throughout Week", x = "Day of Week", y = "Ride Volume (numbers of bikers)")
 
+op <- par(mar = c(8,5,5,1) + 0.1)
+barplot(week_volume$volumes, names.arg = week_volume$weekdays, las=2, ylim = c(0,10000), ylab = "Ride Volume (numbers of bikers)", main = "Ride Volume Throughout Week" )
+par(op)
+
+```
+
+##Ride Volume based on Season
+
+Bikers will much more likely take bikes out during the summer. This is probably due to cold weather conditions that occur during the Fall and Winter. Another hypothesis is that bikers are more likely to take bikes out during the day, and summer and spring are generally defined as having long days and short nights compared to Winter and Fall months.
+
+```{r}
 
 #month
 seasons <- c("Summer", "Spring", "Winter", "Fall")
@@ -98,12 +153,169 @@ ride_volume3 <- function(season1, cb){
 }
 volumes <- c(ride_volume3("Summer", cb_sample),  ride_volume3("Spring", cb_sample), ride_volume3("Winter", cb_sample), ride_volume3("Fall", cb_sample)) 
 season_volume <- data.frame(seasons, volumes)
-ggplot(data = season_volume, aes(x = season_volume$seasons, y = season_volume$volumes)) + geom_point() + labs(title = "Ride Volume Throughout Seasons", x = "Season", y = "Ride Volume (numbers of bikers)")
+barplot(season_volume$volumes, names.arg = season_volume$seasons, las=2, ylim = c(0,25000), ylab = "Ride Volume (number of bikers)", main = "Ride Volume Throughout Seasons" )
+
+```
+
+
+```{r}
+
+#Question 2 Part C
+
+cb = as.data.frame(cb)
+
+longrides <- tapply(cb$tripduration, cb$start.station.name, mean)
+longrides2 <- tail(sort(longrides),20)
+longrides2 = as.data.frame(longrides2)
+rownamesall <- row.names(longrides2)
+
+
+longridesmorning <- subset(cb,cb$timeCategory=="Morning")
+longridesmorning2 <- tapply(longridesmorning$tripduration, longridesmorning$start.station.name, mean)
+longridesmorning2 <- tail(sort(longridesmorning2),20)
+longridesmorning2 = as.data.frame(longridesmorning2)
+longridesmorning2$longridesmorning2 <- factor(longridesmorning2$longridesmorning2, levels = longridesmorning2$longridesmorning2[order(longridesmorning2$longridesmorning2)])
+longridesmorning2$longridesmorning2 = as.numeric(longridesmorning2$longridesmorning2)
+rownamesmorning <- row.names(longridesmorning2)
+
+longridesevening <- subset(cb,cb$timeCategory=="Evening")
+longridesevening2 <- tapply(longridesevening$tripduration, longridesevening$start.station.name, mean)
+longridesevening2 <- tail(sort(longridesevening2),20)
+
+longridesevening2 = as.data.frame(longridesevening2)
+longridesevening2$longridesevening2 <- factor(longridesevening2$longridesevening2, levels = longridesevening2$longridesevening2[order(longridesevening2$longridesevening2)])
+longridesevening2$longridesevening2 = as.numeric(longridesevening2$longridesevening2)
+rownamesevening <- row.names(longridesevening2)
+
+longridesafternoon <- subset(cb,cb$timeCategory=="Afternoon")
+longridesafternoon2 <- tapply(longridesafternoon$tripduration, longridesafternoon$start.station.name, mean)
+longridesafternoon2 <- tail(sort(longridesafternoon2),20)
+View(longridesafternoon2)
+
+longridesafternoon2 = as.data.frame(longridesafternoon2)
+longridesafternoon2$longridesafternoon2 <- factor(longridesafternoon2$longridesafternoon2, levels = longridesafternoon2$longridesafternoon2[order(longridesafternoon2$longridesafternoon2)])
+longridesafternoon2$longridesafternoon2 = as.numeric(longridesafternoon2$longridesafternoon2)
+rownamesafternoon <- row.names(longridesafternoon2)
+
+#plotting graphs
+op <- par(mar = c(5,15,5,1) + 0.1)
+op2 <- par(mgp=c(2.5,1,0))
+
+barplot(longrides2$longrides2, names.arg = rownamesall, las=1,horiz=TRUE, main= "Top 20 Longest Average \n Trip Durations by Station", xlab = "Average Trip Duration (1000s seconds)")
+
+barplot(longridesmorning2$longridesmorning2, names.arg = rownamesmorning, las=1, horiz=TRUE, main="Top 20 Longest Average Morning \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+
+barplot(longridesevening2$longridesevening2, names.arg = rownamesevening, las=1, horiz=TRUE, main="Top 20 Longest Average Evening \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+
+barplot(longridesafternoon2$longridesafternoon2, names.arg = rownamesafternoon, las=1, horiz=TRUE, main="Top 20 Longest Average Afternoon \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+par(op)
+par(op2)
+
+rownamesall = as.factor(rownamesall)
+rownamesmorning = as.factor(rownamesmorning)
+rownamesevening = as.factor(rownamesevening)
+rownamesafternoon = as.factor(rownamesafternoon)
+
+#morning and evening
+morningNevening <- intersect(rownamesmorning,rownamesevening)
+morningNevening = as.factor(morningNevening)
+morningNevening2 <- nlevels(morningNevening)
+
+#morning and afternoon
+morningNafternoon <- intersect(rownamesmorning,rownamesafternoon)
+morningNafternoon = as.factor(morningNafternoon)
+morningNafternoon2 <- nlevels(morningNafternoon)
+#morning and all
+morningNall <- intersect(rownamesmorning,rownamesall)
+morningNall = as.factor(morningNall)
+morningNall2 <- nlevels(morningNall)
+
+#evening and afternoon
+eveningNafternoon <- intersect(rownamesevening,rownamesafternoon)
+eveningNafternoon = as.factor(eveningNafternoon)
+eveningNafternoon2 <- nlevels(eveningNafternoon)
+#evening and all
+eveningNall <- intersect(rownamesevening,rownamesall)
+eveningNall = as.factor(eveningNall)
+eveningNall2 <- nlevels(eveningNall)
+
+#afternoon and all
+afternoonNall <- intersect(rownamesafternoon,rownamesall)
+afternoonNall = as.factor(afternoonNall)
+afternoonNall2 <- nlevels(afternoonNall)
+
+
+#morning, evening, and afternoon
+MENA <- Reduce(intersect, list(rownamesmorning,rownamesevening,rownamesafternoon))
+MENA = as.factor(MENA)
+MENA2 <-nlevels(MENA)
+
+#morning, evening, and all
+MENAll <- Reduce(intersect, list(rownamesmorning,rownamesevening,rownamesall))
+MENAll = as.factor(MENAll)
+MENAll2 <- nlevels(MENAll)
+
+#morning, afternoon, and all
+MANAll <- Reduce(intersect, list(rownamesmorning,rownamesafternoon,rownamesall))
+MANAll = as.factor(MANAll)
+MANAll2 <- nlevels(MANAll)
+#evening, afternoon, and all
+EANAll <- Reduce(intersect, list(rownamesevening,rownamesafternoon,rownamesall))
+EANAll = as.factor(EANAll)
+EANAll2 <- nlevels(EANAll)
+
+#all 4
+ALLFOUR <-Reduce(intersect, list(rownamesmorning,rownamesevening,rownamesafternoon,rownamesall))
+ALLFOUR = as.factor(ALLFOUR)
+ALLFOUR2 <- nlevels(ALLFOUR)
+
+#morning only
+morningonly <- 20-morningNall2-morningNevening2 - morningNafternoon2 - MENA2 - MENAll2 - MANAll2 - ALLFOUR2
+#evening only
+eveningonly <- 20-morningNevening2 - eveningNafternoon2 - eveningNall2 - MENA2 - MENAll2 - EANAll2- ALLFOUR2
+#afternoon only
+afternoononly <- 20 - morningNafternoon2 - eveningNafternoon2 - afternoonNall2 - MENA2 - MANAll2-EANAll2- ALLFOUR2
+#all only
+allonly <- 20- morningNall2 - eveningNall2 - afternoonNall2 - MENAll2 - MANAll2 - EANAll2- ALLFOUR2
+
+venn.plot <- draw.quad.venn(20, 20, 20, 20, morningNafternoon2, morningNevening2, morningNall2, eveningNafternoon2, afternoonNall2,
+eveningNall2, MENA2, MANAll2, MENAll2, EANAll2, ALLFOUR2, category = c("Morning","Afternoon", "Evening", "All"), lwd = rep(2, 4), lty = rep("solid", 4), col =
+rep("black", 4), fill = c("blue","red","green","yellow"), alpha = rep(0.5, 4),
+label.col = rep("black", 15), cex = rep(1, 15),
+fontface = rep("bold", 15), fontfamily = rep("serif",
+15), cat.pos = c(-15, 15, 0, 0), cat.dist = c(0.22,
+0.22, 0.11, 0.11), cat.col = rep("black", 4), cat.cex
+= rep(1, 4), cat.fontface = rep("bold", 4),
+cat.fontfamily = rep("serif", 4), cat.just =
+rep(list(c(0.5, 0.5)), 4), rotation.degree = 0,
+rotation.centre = c(0.5, 0.5), ind = TRUE, cex.prop =
+NULL, print.mode = "raw", sigdigs = 3, direct.area =
+FALSE, area.vector = 0)
+
+#NEED TO VERIFY THESE NUMBERS
 
 ```
 
 
 #Question 3
+
+Visualize the data to get a better sense of their dataset. Two potential visualizations include (again - an illustrative list - you should formulate and add your own visualizations; even though the list below only mentions maps, you need not limit yourself to maps - other graphics are welcome too)
+
+* Show popular stations/routes on the map
+* Show stations with a surplus (more arrivals than departures) and deficit (more departures than arrivals) on a map so that any geographical clustering of these stations can be visually seen.
+
+##Popularity of Bikes by Region
+
+###How Visual Works
+
+* Numbers in Circles = Each number represents the number of users who have taken a bike in that region
+  + Hovering over that region allows you to see the outline of the region in question.
+  + Clicking that region will segment that region to give you sub-regions (you can repeat that process by clicking those regions).
+  
+###Insights from Map
+
+* We invite you to keep interacting with this map to find useful data on which regions are the most popular.
+  + Obvious trend that Downtown and Midtown have the most traffic while Brooklyn and Queens had less.
 
 ```{r}
 
@@ -114,9 +326,36 @@ cb_sample <- sample_n(cb, 5000)
 leaflet(data = cb_sample) %>% addTiles() %>%
   addMarkers(~cb_sample$end.station.longitude, ~cb_sample$start.station.latitude, popup = ~cb_sample$start.station.name, clusterOptions = markerClusterOptions()) %>%   addProviderTiles("CartoDB.Positron")
 
+#NEED TO DOUBLE CHECK THIS GRAPH, SEE IF WE CAN GET A BETTER ONE FROM THIS
+
 ```
 
 #Question 4
+
+While the client wants you to not limit your approach, they are particularly troubled by the following business issues and look forward to any insights on these issues:
+
+* Stations running out of bikes is a big problem. Client would want to know which stations are candidates for increasing bike storage capacity.
+* Bike maintenance bills are piling up. Client thinks that this is because some bikes are being used a lot more than other bikes. Can you check on this assumption?
+
+##Popular and Unpopular Stations
+
+###How Visual Works
+
+* Radius of the circle = How many subscribers took out bikes from that station during the year
+  + Bigger the radius means more subscribers are taking out bikes
+* Clicking the circle
+  + Shows what station you are looking at
+  + Gives number of subscribers from sample that took out bikes from that station
+  
+###Insights from Map
+
+* There are several stations, mainly thoughout downtown and midtown that seem to attract most of the subscribers.
+  + These are the stations most likely to suffer from heightened maintainence and capacity problems.
+  + Recommend cycling bikes from less popular stations to avoid maintainence issues along with increasing capacity at certain stations in MidTown and Downntown
+* Most of the unpopular stations are grouped in Uptown, byt the coastline across Midtown and Downtown, and in Brooklyn/Queens.
+  + Recommend higher advertising in those areas to stimulate demands.
+  + Suggest closing several very unpopular stops to efficiently relocate supply to more popular stations.
+
 
 ```{r}
 
@@ -143,11 +382,76 @@ leaflet(subscriber_count) %>% addTiles() %>%
 
 ```
 
+##Are Certain Bikes Used More?
+### Yes - there is quite a large range
+
+```{r}
+##isolate bike ids
+cb$bikeid <- as.factor(cb$bikeid)
+bike <- unique(cb$bikeid)
+
+bikedata <- data.frame(bike)
+
+library(dplyr)
+set.seed(1)
+bikedata <- data.frame(ID = cb$bikeid)
+bikedata <- bikedata %>% group_by(ID) %>% summarise(no_rows = length(ID))
+
+
+
+##display data
+barplot(bikedata$no_rows)
+
+boxplot(bikedata$no_rows, horizontal = TRUE, xlab="Number of Uses", main="Uses per Bike")
+
+```
+
+##Are Most Bikes Returned to Their Start Station?
+###No - in fact, 98% of bikes are returned to a different station
+
+```{r}
+#count number of times bike is returned to start station
+sameStation = nrow(cb[cb$start.station.id == cb$end.station.id ,])
+differentStation = nrow(cb) - sameStation
+
+#display data
+slices <- c(sameStation, differentStation)
+lbls <- c("Same Station", "Different Station")
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct)
+lbls <- paste(lbls,"%",sep="")
+pie(slices, labels = lbls, main = "Bikes Returned to Same vs. Different Station")
+
+```
+
+
+
+
 #Question 5
+
+The following graphs and visualizations are to add more data to enhance any future business management strategies Citibike would like to execute in the near future.
+
+##Stations with the Longest Commuters
+
+###How Visual Works
+
+* Radius of the circle = Average duration of a biker who starts their route from that station
+  + Bigger the radius means the subscriber is taking the bike for longer periods of time (therefore, longer commutes on average)
+* Clicking the circle
+  + Shows what station you are looking at
+  + Gives average duration of rider
+  
+###Insights from Map
+
+* Two stations seem to be the typical station used for the longest commutes:
+  + Hope St & Union Ave
+  + Clinton St & Tillary St
+* There are multiple stations that also seem to be good spots for commuting with many of them appearing close to the water.
+* Most of the stations in the heart of Downtown and Midtown appear to be places where people take out bikes to move only for a few blocks.
 
 ```{r}
 
-cb_sample <- sample_n(cb, 100)
+cb_sample <- sample_n(cb, 50000)
 
 duration_averages <- data.frame(tapply(cb_sample$tripduration, cb_sample$start.station.name, mean, na.rm = TRUE))
 duration_averages <- na.omit(duration_averages)
@@ -160,9 +464,15 @@ duration_averages$lng <- cb_sample$start.station.longitude[duration_averages$sta
 
 leaflet(duration_averages) %>% addTiles() %>%
   addCircles(lng = ~duration_averages$lng, lat = ~duration_averages$lat, weight = 1,
-    radius = ~duration_averages$average.duration/2, popup =  paste(duration_averages$station.name, "<br/>", "Average Trip Duration: ", duration_averages$average.duration, " seconds")
+    radius = ~duration_averages$average.duration/median(duration_averages$average.duration) * 100, popup =  paste(duration_averages$station.name, "<br/>", "Average Trip Duration: ", duration_averages$average.duration, " seconds")
   ) %>%   addProviderTiles("CartoDB.Positron")
 
 
 ```
+
+
+
+
+
+
 
