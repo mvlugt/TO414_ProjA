@@ -4,8 +4,11 @@ author: "Michael Im"
 date: "February 19, 2017"
 output: 
   html_document: 
+    theme: united
     toc: yes
-    toc_float: yes
+    number_sections: TRUE
+    toc_float:
+      collapsed: FALSE
 ---
 
 ```{r}
@@ -72,6 +75,15 @@ Identify patterns in the ride history data. Explain these patterns using appropr
 * Which stations see the most asymmetric traffic (more arrivals than departures and vice versa)? Does this change with time of day and day of the week?
 * Which stations originate the longest rides? Does this change as we go through different times of the day?
 
+##Ride Volume Data based on Time of Day
+
+As you can see from the data, there are several peak times in the tide volume throughout a normal day. These peak times represent the morning and evening rush hours to and from work.
+
+* Morning Rush - 8:00 AM to 10:00 AM (peaking at 9:00 AM)
+
+* Evening Rush - 4:00 pm to 7:00 PM (peaking at 6:00 PM)
+
+Also, note that average ride volume is the highest between the two rush hours (so in the afternoon), and there are very few bikers out between 10:00 PM and 6:00 AM.
 
 ```{r}
 
@@ -92,17 +104,9 @@ ggplot(data = hour_volume, aes(x = hour_volume$hours, y = hour_volume$volumes)) 
 
 ```
 
-##Ride Volume Data based on Time of Day
+##Ride Volume Data based on Day of the Week
 
-As you can see from the data, there are several peak times in the tide volume throughout a normal day. These peak times represent the morning and evening rush hours to and from work.
-
-* Morning Rush - 8:00 AM to 10:00 AM (peaking at 9:00 AM)
-
-* Evening Rush - 4:00 pm to 7:00 PM (peaking at 6:00 PM)
-
-Also, note that average ride volume is the highest between the two rush hours (so in the afternoon), and there are very few bikers out between 10:00 PM and 6:00 AM.
-
-
+It is clear that users are more likely to use bikes during the work week rather than the weekend. Therefore, problems such as shortage of bikes are more likely to occur during the work week (especially on days like Tuesday through Thursdays, which are more in the middle of the work week).
 
 ```{r}
 
@@ -122,9 +126,9 @@ par(op)
 
 ```
 
-##Ride Volume Data based on Day of the Week
+##Ride Volume based on Season
 
-It is clear that users are more likely to use bikes during the work week rather than the weekend. Therefore, problems such as shortage of bikes are more likely to occur during the work week (especially on days like Tuesday through Thursdays, which are more in the middle of the work week).
+Bikers will much more likely take bikes out during the summer. This is probably due to cold weather conditions that occur during the Fall and Winter. Another hypothesis is that bikers are more likely to take bikes out during the day, and summer and spring are generally defined as having long days and short nights compared to Winter and Fall months.
 
 ```{r}
 
@@ -139,11 +143,6 @@ season_volume <- data.frame(seasons, volumes)
 barplot(season_volume$volumes, names.arg = season_volume$seasons, las=2, ylim = c(0,25000), ylab = "Ride Volume (number of bikers)", main = "Ride Volume Throughout Seasons" )
 
 ```
-
-##Ride Volume based on Season
-
-Bikers will much more likely take bikes out during the summer. This is probably due to cold weather conditions that occur during the Fall and Winter. Another hypothesis is that bikers are more likely to take bikes out during the day, and summer and spring are generally defined as having long days and short nights compared to Winter and Fall months.
-
 
 
 ```{r}
@@ -292,6 +291,18 @@ Visualize the data to get a better sense of their dataset. Two potential visuali
 * Show popular stations/routes on the map
 * Show stations with a surplus (more arrivals than departures) and deficit (more departures than arrivals) on a map so that any geographical clustering of these stations can be visually seen.
 
+##Popularity of Bikes by Region
+
+###How Visual Works
+
+* Numbers in Circles = Each number represents the number of users who have taken a bike in that region
+  + Hovering over that region allows you to see the outline of the region in question.
+  + Clicking that region will segment that region to give you sub-regions (you can repeat that process by clicking those regions).
+  
+###Insights from Map
+
+* We invite you to keep interacting with this map to find useful data on which regions are the most popular.
+  + Obvious trend that Downtown and Midtown have the most traffic while Brooklyn and Queens had less.
 
 ```{r}
 
@@ -312,6 +323,25 @@ While the client wants you to not limit your approach, they are particularly tro
 
 * Stations running out of bikes is a big problem. Client would want to know which stations are candidates for increasing bike storage capacity.
 * Bike maintenance bills are piling up. Client thinks that this is because some bikes are being used a lot more than other bikes. Can you check on this assumption?
+
+##Popular and Unpopular Stations
+
+###How Visual Works
+
+* Radius of the circle = How many subscribers took out bikes from that station during the year
+  + Bigger the radius means more subscribers are taking out bikes
+* Clicking the circle
+  + Shows what station you are looking at
+  + Gives number of subscribers from sample that took out bikes from that station
+  
+###Insights from Map
+
+* There are several stations, mainly thoughout downtown and midtown that seem to attract most of the subscribers.
+  + These are the stations most likely to suffer from heightened maintainence and capacity problems.
+  + Recommend cycling bikes from less popular stations to avoid maintainence issues along with increasing capacity at certain stations in MidTown and Downntown
+* Most of the unpopular stations are grouped in Uptown, byt the coastline across Midtown and Downtown, and in Brooklyn/Queens.
+  + Recommend higher advertising in those areas to stimulate demands.
+  + Suggest closing several very unpopular stops to efficiently relocate supply to more popular stations.
 
 
 ```{r}
@@ -339,29 +369,30 @@ leaflet(subscriber_count) %>% addTiles() %>%
 
 ```
 
-##Popular and Unpopular Stations
 
-###How Visual Works
-
-* Radius of the circle = How many subscribers took out bikes from that station during the year
-  + Bigger the radius means more subscribers are taking out bikes
-* Clicking the circle
-  + Shows what station you are looking at
-  + Gives number of subscribers from sample that took out bikes from that station
-  
-###Insights from Map
-
-* There are several stations, mainly thoughout downtown and midtown that seem to attract most of the subscribers.
-  + These are the stations most likely to suffer from heightened maintainence and capacity problems.
-  + Recommend cycling bikes from less popular stations to avoid maintainence issues along with increasing capacity at certain stations in MidTown and Downntown
-* Most of the unpopular stations are grouped in Uptown, byt the coastline across Midtown and Downtown, and in Brooklyn/Queens.
-  + Recommend higher advertising in those areas to stimulate demands.
-  + Suggest closing several very unpopular stops to efficiently relocate supply to more popular stations.
 
 
 #Question 5
 
 The following graphs and visualizations are to add more data to enhance any future business management strategies Citibike would like to execute in the near future.
+
+##Stations with the Longest Commuters
+
+###How Visual Works
+
+* Radius of the circle = Average duration of a biker who starts their route from that station
+  + Bigger the radius means the subscriber is taking the bike for longer periods of time (therefore, longer commutes on average)
+* Clicking the circle
+  + Shows what station you are looking at
+  + Gives average duration of rider
+  
+###Insights from Map
+
+* Two stations seem to be the typical station used for the longest commutes:
+  + Hope St & Union Ave
+  + Clinton St & Tillary St
+* There are multiple stations that also seem to be good spots for commuting with many of them appearing close to the water.
+* Most of the stations in the heart of Downtown and Midtown appear to be places where people take out bikes to move only for a few blocks.
 
 ```{r}
 
@@ -384,45 +415,8 @@ leaflet(duration_averages) %>% addTiles() %>%
 
 ```
 
-##Stations with the Longest Commuters
 
-###How Visual Works
 
-* Radius of the circle = Average duration of a biker who starts their route from that station
-  + Bigger the radius means the subscriber is taking the bike for longer periods of time (therefore, longer commutes on average)
-* Clicking the circle
-  + Shows what station you are looking at
-  + Gives average duration of rider
-  
-###Insights from Map
-
-* Two stations seem to be the typical station used for the longest commutes:
-  + Hope St & Union Ave
-  + Clinton St & Tillary St
-* There are multiple stations that also seem to be good spots for commuting with many of them appearing close to the water.
-* Most of the stations in the heart of Downtown and Midtown appear to be places where people take out bikes to move only for a few blocks.
-
-```{r}
-
-cb_sample <- sample_n(cb, 30000)
-
-leaflet(data = cb_sample) %>% addTiles() %>%
-  addMarkers(~cb_sample$end.station.longitude, ~cb_sample$start.station.latitude, popup = ~cb_sample$start.station.name, clusterOptions = markerClusterOptions()) %>%   addProviderTiles("CartoDB.Positron")
-
-```
-
-##Popularity of Bikes by Region
-
-###How Visual Works
-
-* Numbers in Circles = Each number represents the number of users who have taken a bike in that region
-  + Hovering over that region allows you to see the outline of the region in question.
-  + Clicking that region will segment that region to give you sub-regions (you can repeat that process by clicking those regions).
-  
-###Insights from Map
-
-* We invite you to keep interacting with this map to find useful data on which regions are the most popular.
-  + Obvious trend that Downtown and Midtown have the most traffic while Brooklyn and Queens had less.
 
 
 
