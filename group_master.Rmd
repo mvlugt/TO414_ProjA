@@ -1,6 +1,6 @@
 ---
 title: "group_master"
-author: "Michael Im"
+author: "Michael Im, Michael Vander Lugt, Josh Horowitz, Don Chao, Evan Fisher"
 date: "February 19, 2017"
 output: 
   html_document: 
@@ -12,6 +12,185 @@ output:
 ---
 
 ```{r}
+
+temp <- tempfile()
+download.file("https://s3.amazonaws.com/tripdata/201601-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201601-citibike-tripdata.csv")
+data1 <- read.csv("201601-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201602-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201602-citibike-tripdata.csv")
+data2 <- read.csv("201602-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201603-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201603-citibike-tripdata.csv")
+data3 <- read.csv("201603-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201604-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201604-citibike-tripdata.csv")
+data4 <- read.csv("201604-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201605-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201605-citibike-tripdata.csv")
+data5 <- read.csv("201605-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201606-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201606-citibike-tripdata.csv")
+data6 <- read.csv("201606-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201607-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201607-citibike-tripdata.csv")
+data7 <- read.csv("201607-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201608-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201608-citibike-tripdata.csv")
+data8 <- read.csv("201608-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201609-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201609-citibike-tripdata.csv")
+data9 <- read.csv("201609-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201610-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201610-citibike-tripdata.csv")
+data10 <- read.csv("201610-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201611-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201611-citibike-tripdata.csv")
+data11 <- read.csv("201611-citibike-tripdata.csv")
+
+download.file("https://s3.amazonaws.com/tripdata/201612-citibike-tripdata.zip",temp, mode="wb")
+unzip(temp, "201612-citibike-tripdata.csv")
+data12 <- read.csv("201612-citibike-tripdata.csv")
+
+#determine how many rows to take for sample
+#take random samples from all data sets
+num.rows = nrow(data1) * 0.005
+data1.small <- data1[sample(nrow(data1), round(num.rows)), ]
+
+num.rows = nrow(data2) * 0.005
+data2.small <- data2[sample(nrow(data2), round(num.rows)), ]
+
+num.rows = nrow(data3) * 0.005
+data3.small <- data3[sample(nrow(data3), round(num.rows)), ]
+
+num.rows = nrow(data4) * 0.005
+data4.small <- data4[sample(nrow(data4), round(num.rows)), ]
+
+num.rows = nrow(data5) * 0.005
+data5.small <- data5[sample(nrow(data5), round(num.rows)), ]
+
+num.rows = nrow(data6) * 0.005
+data6.small <- data6[sample(nrow(data6), round(num.rows)), ]
+
+num.rows = nrow(data7) * 0.005
+data7.small <- data7[sample(nrow(data7), round(num.rows)), ]
+
+num.rows = nrow(data8) * 0.005
+data8.small <- data8[sample(nrow(data8), round(num.rows)), ]
+
+num.rows = nrow(data9) * 0.005
+data9.small <- data9[sample(nrow(data9), round(num.rows)), ]
+
+num.rows = nrow(data10) * 0.005
+data10.small <- data10[sample(nrow(data10), round(num.rows)), ]
+
+num.rows = nrow(data11) * 0.005
+data11.small <- data11[sample(nrow(data11), round(num.rows)), ]
+
+num.rows = nrow(data12) * 0.005
+datasmall12 <- data12[sample(nrow(data12), round(num.rows)), ]
+
+
+#merge all data
+
+data.all <- merge(data1.small, data2.small, all = TRUE)
+data.all <- merge(data.all, data3.small, all = TRUE)
+data.all <- merge(data.all, data4.small, all = TRUE)
+data.all <- merge(data.all, data5.small, all = TRUE)
+data.all <- merge(data.all, data6.small, all = TRUE)##
+data.all <- merge(data.all, data7.small, all = TRUE)
+data.all <- merge(data.all, data8.small, all = TRUE)
+data.all <- merge(data.all, data9.small, all = TRUE)
+#data.all <- merge(data.all, data10.small, all = TRUE)
+#data.all <- merge(data.all, data11.small, all = TRUE)
+#data.all <- merge(data.all, data12.small, all = TRUE)
+
+
+cb <- data.all
+
+
+#need to separate the space in the starttime and endtime to get the time and date columns separate
+#strsplit(x, " ")
+x1 <- cb$starttime
+x2 <- as.character(x1)
+x2 <- c(x2)
+x3 <- read.table(text = x2, sep = " ", colClasses = "character")
+x4 <- x3$V1
+x5 <- read.table(text = x4, sep = "/", colClasses = "character")
+cb$starttime_date = paste(x5$V3, "-", x5$V1, "-", x5$V2, sep = "")
+cb$month = x5$V1
+cb$starttime_time = x3$V2 #times are in character now
+cb$starttime_time = gsub(':', '', cb$starttime_time) #removes the ':' from times
+cb$starttime_time = as.numeric(cb$starttime_time) #makes times numbers
+
+#same thing for stoptime
+x1 <- cb$stoptime
+x2 <- as.character(x1)
+x2 <- c(x2)
+x3 <- read.table(text = x2, sep = " ", colClasses = "character")
+x4 <- x3$V1
+x5 <- read.table(text = x4, sep = "/", colClasses = "character")
+cb$stoptime_date = paste(x5$V3, "-", x5$V1, "-", x5$V2, sep = "")
+cb$stoptime_time = x3$V2 #times are in character now
+cb$stoptime_time = gsub(':', '', cb$stoptime_time) #removes the ':' from times
+cb$stoptime_time = as.numeric(cb$stoptime_time) #makes times numbers
+
+
+##make new columns for time of day, day of week, month, season
+#time of day:
+calculateTime <- function(x) {
+  if(x < 120000) {
+    timeCategory <- "Morning"
+  } else if(x < 170000) {
+    timeCategory <- "Afternoon"
+  } else if(x <= 240000) {
+    timeCategory <- "Evening"
+  }
+  timeCategory
+}
+## create new column with time of day as factor
+cb$timeCategory <- sapply(cb$starttime_time, calculateTime)
+cb$timeCategory <- as.factor(cb$timeCategory)
+
+#day of week column
+cb$weekday = weekdays(as.Date(cb$starttime_date))
+
+#season
+calculateSeason <- function(x) {
+  if(x < 3) {
+    season <- "Winter"
+  } else if(x < 6) {
+    season <- "Spring"
+  } else if(x < 9) {
+    season <- "Summer"
+  } else if(x <= 12) {
+    season <- "Fall"
+  }
+  season
+}
+## create new column with time of day as factor
+cb$month <- as.integer(cb$month)
+cb$season <- sapply(cb$month, calculateSeason)
+cb$season <- as.factor(cb$season)
+
+
+write.csv(cb, file = "citibike_jan_sept_v1.csv")
+
+
+```
+
+
+```{r}
 library(dplyr)
 library(ggplot2)
 library(data.table)
@@ -19,6 +198,7 @@ library(leaflet)
 library(futile.logger)
 library(grid)
 library(VennDiagram)
+library(knitr)
 cb <- read.csv("citibike_jan_sept_v1.csv")
 
 ```
@@ -88,7 +268,7 @@ Identify patterns in the ride history data. Explain these patterns using appropr
 * Which stations see the most asymmetric traffic (more arrivals than departures and vice versa)? Does this change with time of day and day of the week?
 * Which stations originate the longest rides? Does this change as we go through different times of the day?
 
-##Ride Volume Data based on Time of Day
+##Ride Volume Data based on Time of Day (Q2a)
 
 As you can see from the data, there are several peak times in the tide volume throughout a normal day. These peak times represent the morning and evening rush hours to and from work.
 
@@ -117,7 +297,7 @@ ggplot(data = hour_volume, aes(x = hour_volume$hours, y = hour_volume$volumes)) 
 
 ```
 
-##Ride Volume Data based on Day of the Week
+##Ride Volume Data based on Day of the Week (Q2a)
 
 It is clear that users are more likely to use bikes during the work week rather than the weekend. Therefore, problems such as shortage of bikes are more likely to occur during the work week (especially on days like Tuesday through Thursdays, which are more in the middle of the work week).
 
@@ -139,7 +319,7 @@ par(op)
 
 ```
 
-##Ride Volume based on Season
+##Ride Volume based on Season (Q2a)
 
 Bikers will much more likely take bikes out during the summer. This is probably due to cold weather conditions that occur during the Fall and Winter. Another hypothesis is that bikers are more likely to take bikes out during the day, and summer and spring are generally defined as having long days and short nights compared to Winter and Fall months.
 
@@ -156,10 +336,544 @@ season_volume <- data.frame(seasons, volumes)
 barplot(season_volume$volumes, names.arg = season_volume$seasons, las=2, ylim = c(0,25000), ylab = "Ride Volume (number of bikers)", main = "Ride Volume Throughout Seasons" )
 
 ```
+##What is the most frequently used start and end stations? (Q2b)
 
-
+* start station: Pershing Squre North; end station: Pershing Square North
 ```{r}
 
+t <- table(cb$start.station.name)
+w <- as.data.frame(t)
+w[which.max(w$Freq),] 
+
+
+t2 <- table(cb$end.station.name)
+w2 <- as.data.frame(t2)
+w2[which.max(w2$Freq),] 
+
+```
+
+##What is the most asymmetric start and end station? (Q2b)
+
+The most assymetric start station is the station that has the greatest difference between start station frequency and end station frequency. In the output, the most asymmetric start station is the station with the highest positive number for "Freq_Dif". Similarly, the most assymetric end station is the station that has the greatest difference between end station frequency and start station frequency. In the output, the most end asymmetric station is the station with the highest negative number for "Freq_Dif". 
+
+The most asymmetric start station is "Penn Station Valet". It has 98 more uses as a start station than as an end station. The most asymmetric end station is "Greenwhich Ave & 8 Ave". It has 75 more uses as an end station than as a start station.
+```{r}
+
+#finding most asymmetric stations 
+
+w <- as.data.frame(w)
+w2 <- as.data.frame(w2)
+
+
+merged_w_w2 <- full_join(w,w2, by = "Var1")
+merged_w_w2 <- as.data.frame(merged_w_w2)
+
+#adds new column (Freq_dif)
+merged_w_w2$Freq_dif <- merged_w_w2$Freq.x - merged_w_w2$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm <- merged_w_w2[which.max(merged_w_w2$Freq_dif),] 
+most_start_asymm
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm <- merged_w_w2[which.min(merged_w_w2$Freq_dif),]
+most_end_asymm
+
+```
+
+
+Below, there is a barplot showing the top 10 most assmyetric start stations. 
+```{r, fig.height=10}
+
+top_n <- function(dataFrame) {
+  return(nrow(dataFrame) * .017)
+}
+
+#data frame of top 10 asymmetric start stations 
+most_start_asymm_top10 <- merged_w_w2[order(merged_w_w2$Freq_dif, decreasing=TRUE)[1:top_n(merged_w_w2)],]
+
+par(oma = c(10,0,0,0))
+
+#plot of top 10 asymmetric start stations
+barplot(most_start_asymm_top10$Freq_dif, names.arg = most_start_asymm_top10$Var1, col = c("slategray2", "slategray3", "slategray4"), las = 3, main = "Most Asymmetric Stations (Start Station > End Station)",  ylab = "# of times favoring start station usage over end station usage")
+
+```
+
+Below, there is a barplot showing the top 10 most assymetric end stations. As the y-axis gets more negative, asymmetry increases. 
+```{r, fig.height=10}
+#data frame of top 10 asymmetric end stations 
+most_end_asymm_top10 <- merged_w_w2[order(merged_w_w2$Freq_dif, decreasing=F)[1:top_n(merged_w_w2)],]
+
+#plot of top 10 asymmetric end stations
+
+par(oma = c(10,0,0,0))
+
+barplot(most_end_asymm_top10$Freq_dif, names.arg = most_end_asymm_top10$Var1, col = c("slategray2", "slategray3", "slategray4"), las = 2, main = "Most Asymmetric Stations (End Station > Start Station)", ylab = "# of times favoring end station usage over start station usage")
+
+
+```
+
+##Does station frequency change by time of day? - Morning / Afternon / Evening (Q2b)
+
+As the data below shows, frequency of start and end stations does change with time of day. While "Pershing Square North" was the the frequently used start and end station overall, "Penn Station Valet" was the most frequently used start station in the morning and "Pershing Square North" was the most frequently used end station in the morning. Also, "E 17 St. & Broadway" is the most frequenrly used start station in the afternoon, and "West St & Chambers St" is most frequently used end station in the afternoon. Lastly, "Pershing Square North" is the most used start and end station in the evening.
+```{r}
+
+#morning data set 
+data_morning <- subset(cb, cb$timeCategory == "Morning")
+data_morning <- as.data.frame(data_morning)
+
+#"Penn Station Valet" is most popular start station in the morning 
+t_morning <- table(data_morning$start.station.name)
+w_morning <- as.data.frame(t_morning)
+w_morning[which.max(w_morning$Freq),]
+
+#"Pershing Sqaure North is most popular end station in the morning"
+t2_morning <- table(data_morning$end.station.name)
+w2_morning <- as.data.frame(t2_morning)
+w2_morning[which.max(w2_morning$Freq),] 
+
+
+#afternoon data set
+data_afternoon <- subset(cb, cb$timeCategory == "Afternoon")
+data_afternoon <- as.data.frame(data_afternoon)
+
+#"E 17 St. & Broadway" is most popular start station in the afternoon
+t_afternoon <- table(data_afternoon$start.station.name)
+w_afternoon <- as.data.frame(t_afternoon)
+w_afternoon[which.max(w_afternoon$Freq),]
+
+#"West St & Chambers St" is most popilar end station in the afternoon
+t2_afternoon <- table(data_afternoon$end.station.name)
+w2_afternoon <- as.data.frame(t2_afternoon)
+w2_afternoon[which.max(w2_afternoon$Freq),] 
+
+
+#evening data set 
+data_evening <- subset(cb, cb$timeCategory == "Evening")
+data_evening <- as.data.frame(data_evening)
+
+#"Pershing Sqaure North" is most popular start station in the evening
+t_evening <- table(data_evening$start.station.name)
+w_evening <- as.data.frame(t_evening)
+w_evening[which.max(w_evening$Freq),]
+
+#"Pershing Square North" is most popular end station in the evening
+t2_evening <- table(data_evening$end.station.name)
+w2_evening <- as.data.frame(t2_evening)
+w2_evening[which.max(w2_evening$Freq),] 
+
+```
+
+Below, there is a barplot of the most frequently used start station for each time of the day. As the plot shows, the time of day that has the overall most frequently used start station is the evening. 
+```{r}
+
+#start station frequency barplot by time of day
+start_station_freqs_time_day <- rbind(w_morning[which.max(w_morning$Freq),], w_afternoon[which.max(w_afternoon$Freq),], w_evening[which.max(w_evening$Freq),])
+start_station_freqs_time_day$TimeDay <- c("Morning", "Afternoon", "Evening")
+barplot(start_station_freqs_time_day$Freq, names.arg = start_station_freqs_time_day$TimeDay, col = c("slategray2", "slategray3", "slategray4"), las = 1, main = "Most Frequently Used Start Station by Time of Day", xlab = "Time of Day", ylab = "Frequency")
+
+```
+
+Below, there is a barplot of the most frequently used end station for each time of the day. As the plot shows, the time of day that has the overall most frequently used end station is the evening.
+```{r}
+
+#end station frequency barplot by time of day
+end_station_freqs_time_day <- rbind(w2_morning[which.max(w2_morning$Freq),], w2_afternoon[which.max(w2_afternoon$Freq),], w2_evening[which.max(w2_evening$Freq),])
+end_station_freqs_time_day$TimeDay <- c("Morning", "Afternoon", "Evening")
+barplot(end_station_freqs_time_day$Freq, names.arg = end_station_freqs_time_day$TimeDay, col = c("slategray2", "slategray3", "slategray4"), las = 1, main = "Most Frequently Used End Station by Time of Day", xlab = "Time of Day", ylab = "Frequency")
+
+```
+
+
+##Does station asymmetry change by time of day? - Morning / Afternoon / Evening (Q2b)
+
+As the data below shows, start and end station asymmetry changes by time of day."Penn Station Valet" is the overall most asymmetric start station and "Greenwhich Ave & 8 Ave" is the overall most asymmetric end station. "Penn Station Valet" is the most asymmetric start station in the morning, while "W 52 St & 5 Ave" is the most asymmetric end station in the morning. "Penn Station Valet" is the most asymmetric start station in the afteroon, while "Centre St & Chambers St" is the most asymmetric end station in the afternoon. "W 52 St & 5 Ave" is the most asymmetric start station in the evening, while "	E 14 St & Avenue B" is the most asymmetric end station in the evening.
+```{r}
+
+#morning
+w_morning <- as.data.frame(w_morning)
+w2_morning <- as.data.frame(w2_morning)
+
+merged_w_w2_morning <- full_join(w_morning,w2_morning, by = "Var1")
+merged_w_w2_morning <- as.data.frame(merged_w_w2_morning)
+
+#adds new column (Freq_dif)
+merged_w_w2_morning$Freq_dif <- merged_w_w2_morning$Freq.x - merged_w_w2_morning$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_morning <- merged_w_w2_morning[which.max(merged_w_w2_morning$Freq_dif),] 
+most_start_asymm_morning
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_morning <- merged_w_w2_morning[which.min(merged_w_w2_morning$Freq_dif),]
+most_end_asymm_morning
+
+#afternoon
+w_afternoon <- as.data.frame(w_afternoon)
+w2_afternoon <- as.data.frame(w2_afternoon)
+
+merged_w_w2_afternoon <- full_join(w_morning,w2_afternoon, by = "Var1")
+merged_w_w2_afternoon <- as.data.frame(merged_w_w2_afternoon)
+
+#adds new column (Freq_dif)
+merged_w_w2_afternoon$Freq_dif <- merged_w_w2_afternoon$Freq.x - merged_w_w2_afternoon$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_afternoon <- merged_w_w2_afternoon[which.max(merged_w_w2_afternoon$Freq_dif),] 
+most_start_asymm_afternoon
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_afternoon <- merged_w_w2_afternoon[which.min(merged_w_w2_afternoon$Freq_dif),]
+most_end_asymm_afternoon
+
+#evening
+w_evening <- as.data.frame(w_evening)
+w2_evening <- as.data.frame(w2_evening)
+
+merged_w_w2_evening <- full_join(w_evening,w2_evening, by = "Var1")
+merged_w_w2_evening <- as.data.frame(merged_w_w2_evening)
+
+#adds new column (Freq_dif)
+merged_w_w2_evening$Freq_dif <- merged_w_w2_evening$Freq.x - merged_w_w2_evening$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_evening <- merged_w_w2_evening[which.max(merged_w_w2_evening$Freq_dif),] 
+most_start_asymm_evening
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_evening <- merged_w_w2_evening[which.min(merged_w_w2_evening$Freq_dif),]
+most_end_asymm_evening
+
+```
+
+Below, there is a barplot of the highest asymmetric start station for each time of day. As the barplot shows, the time of day with the highest start station asymmetry is the morning, and the the time of day with the lowest start startion asymmetry is the evening. 
+```{r}
+
+#barplot of most assymetric start station by time of day 
+most_start_asymm_time_day <- rbind(most_start_asymm_morning, most_start_asymm_afternoon, most_start_asymm_evening)
+
+most_start_asymm_time_day$time_of_day <- c("Morning", "Afternoon", "Evening")
+
+
+barplot(most_start_asymm_time_day$Freq_dif, names.arg = most_start_asymm_time_day$time_of_day, col = c("slategray2", "slategray3", "slategray4"), las = 1, main = "Most Asymmetric Start Station by Time of Day", xlab = "Time of Day", ylab = "Asymmetry Count")
+
+```
+
+Below, there is a barplot of the highest asymmetric end station for each time of day. As the barplot suggests, end station asymmetry is the highest in the morning, second highest in the evening, and least in the afternoon. 
+```{r}
+
+#barplot of most assymetreic end station by time of day
+most_end_asymm_time_day <- rbind(most_end_asymm_morning, most_end_asymm_afternoon, most_end_asymm_evening)
+
+most_end_asymm_time_day$time_of_day <- c("Morning", "Afternoon", "Evening")
+
+
+barplot(most_end_asymm_time_day$Freq_dif, names.arg = most_end_asymm_time_day$time_of_day, col = c("slategray2", "slategray3", "slategray4"), las = 1, main = "Most Asymmetric End Station by Time of Day", xlab = "Time of Day", ylab = "Asymmetry Count")
+
+```
+
+##Does start and end station frequency change by day of week? (Q2b)
+
+As the data below shows, start and end station frequency change with some days of the week. "Pershing Square North" is the most frequently used start and end station overall. The most frequently used start station on Monday is "West St & Chambers St", while the most frequently used end station on Monday is "Pershing Square North". The most frequently used start and end station on Tuesday, Wednesday, Thursday,and Friday is "Pershing Square North". On Saturday, "West St & Chambers St" is the most frequently used start and end station. Lastly,  "W 21 St & 6 Ave is the most frequently used start station on Sunday and "Centre St & Chambers St" is the most frequently used end station on Sunday.
+```{r}
+
+#Monday data set 
+data_monday <- subset(cb, cb$weekday == "Monday")
+data_monday <- as.data.frame(data_monday)
+
+#"West St & Chambers St" is most popular start station on Monday
+t_monday <- table(data_monday$start.station.name)
+w_monday <- as.data.frame(t_monday)
+w_monday[which.max(w_monday$Freq),]
+
+#"Pershing Square North"" is most popular end station on Monday
+t2_monday <- table(data_monday$end.station.name)
+w2_monday <- as.data.frame(t2_monday)
+w2_monday[which.max(w2_monday$Freq),]
+
+#Tuesday data set 
+data_tuesday <- subset(cb, cb$weekday == "Tuesday")
+data_tuesday <- as.data.frame(data_tuesday)
+
+#"Pershing Square North" is most popular start station on Tuesday
+t_tuesday <- table(data_tuesday$start.station.name)
+w_tuesday <- as.data.frame(t_tuesday)
+w_tuesday[which.max(w_tuesday$Freq),]
+
+
+#"Pershing Sqaure North" is most popular end station on Tuesday
+t2_tuesday <- table(data_tuesday$end.station.name)
+w2_tuesday <- as.data.frame(t2_tuesday)
+w2_tuesday[which.max(w2_tuesday$Freq),]
+
+
+#Wedneday data set 
+data_wed <- subset(cb, cb$weekday == "Wednesday")
+data_wed <- as.data.frame(data_wed)
+
+#"Pershing Square North" is most popular start station on Wednesday
+t_wed <- table(data_wed$start.station.name)
+w_wed <- as.data.frame(t_wed)
+w_wed[which.max(w_wed$Freq),]
+
+#"Pershing Sqaure North" is most popular end station on Wednesday
+t2_wed <- table(data_wed$end.station.name)
+w2_wed <- as.data.frame(t2_wed)
+w2_wed[which.max(w2_wed$Freq),]
+
+#Thurday data set 
+data_thurs <- subset(cb, cb$weekday == "Thursday")
+data_thurs <- as.data.frame(data_thurs)
+
+#"Pershing Square North" is most popular start station on Thursday
+t_thurs <- table(data_thurs$start.station.name)
+w_thurs <- as.data.frame(t_thurs)
+w_thurs[which.max(w_thurs$Freq),]
+
+#"Pershing Square North" is most popular end station on Thursday
+t2_thurs <- table(data_thurs$end.station.name)
+w2_thurs <- as.data.frame(t2_thurs)
+w2_thurs[which.max(w2_thurs$Freq),] 
+
+#Friday data set 
+data_fri <- subset(cb, cb$weekday == "Friday")
+data_fri <- as.data.frame(data_fri)
+
+#"Pershing Square North" is most popular start station on Friday
+t_fri <- table(data_fri$start.station.name)
+w_fri <- as.data.frame(t_fri)
+w_fri[which.max(w_fri$Freq),]
+
+#"Pershing Square North" is most popular end station on Friday
+t2_fri <- table(data_fri$end.station.name)
+w2_fri <- as.data.frame(t2_fri)
+w2_fri[which.max(w2_fri$Freq),]
+
+#Saturday data set 
+data_sat <- subset(cb, cb$weekday == "Saturday")
+data_sat <- as.data.frame(data_sat)
+
+#"West St & Chambers St" is most popular start station on Saturday
+t_sat <- table(data_sat$start.station.name)
+w_sat <- as.data.frame(t_sat)
+w_sat[which.max(w_sat$Freq),]
+
+#"West St & Chambers St" is most popular end station on Saturday
+t2_sat <- table(data_sat$end.station.name)
+w2_sat <- as.data.frame(t2_sat)
+w2_sat[which.max(w2_sat$Freq),]
+
+#Sunday data set 
+data_sun <- subset(cb, cb$weekday == "Sunday")
+data_sun <- as.data.frame(data_sun)
+
+#"W 21 St & 6 Ave" is most popular start station on Sunday
+t_sun <- table(data_sun$start.station.name)
+w_sun <- as.data.frame(t_sun)
+w_sun[which.max(w_sun$Freq),]
+
+#"Centre St & Chambers St" is most popular end station on Sunday
+t2_sun <- table(data_sun$end.station.name)
+w2_sun <- as.data.frame(t2_sun)
+w2_sun[which.max(w2_sun$Freq),] 
+
+```
+
+Below, there are barplots of the most frequently used start station and end station for each day of the week. As the plots show, the day of the week that has the most frequently used start station is Thursday, and the day of the week that has the most frequently used end station is Tuesday. 
+```{r}
+#barplot of most frequent used start station for each day of week
+start_station_freq_day_week <- rbind(w_monday[which.max(w_monday$Freq),], w_tuesday[which.max(w_tuesday$Freq),], w_wed[which.max(w_wed$Freq),], w_thurs[which.max(w_thurs$Freq),], w_fri[which.max(w_fri$Freq),], w_sat[which.max(w_sat$Freq),], w_sun[which.max(w_sun$Freq),])
+
+start_station_freq_day_week$Day_of_Week <- c("Monday", "Tuesday", "Wed", "Thursday", "Friday", "Saturday", "Sunday")
+
+barplot(start_station_freq_day_week$Freq, names.arg = start_station_freq_day_week$Day_of_Week, col = c("slategray2", "slategray3", "slategray4", "steelblue2", "steelblue3", "steelblue4", "lightblue4"), las = 1, main = "Frequency of Most Frequently Used Start Station \n for each Day of Week", xlab = "Day of Week", ylab = "Frequency")
+
+
+#barplot of most frequent used end station for each day of week
+end_station_freq_day_week <- rbind(w2_monday[which.max(w2_monday$Freq),], w2_tuesday[which.max(w2_tuesday$Freq),], w2_wed[which.max(w2_wed$Freq),], w2_thurs[which.max(w2_thurs$Freq),], w2_fri[which.max(w2_fri$Freq),], w2_sat[which.max(w2_sat$Freq),], w2_sun[which.max(w2_sun$Freq),])
+
+end_station_freq_day_week$Day_of_Week <- c("Monday", "Tuesday", "Wed", "Thursday", "Friday", "Saturday", "Sunday")
+
+barplot(end_station_freq_day_week$Freq, names.arg = end_station_freq_day_week$Day_of_Week, col = c("slategray2", "slategray3", "slategray4", "steelblue2", "steelblue3", "steelblue4", "lightblue4"), las = 1, main = "Frequency of Most Frequently Used End Station \n for each Day of Week", xlab = "Day of Week", ylab = "Frequency")
+```
+
+##Does Start and End Station Asymmetry change with the day of the week? (Q2b)
+
+As the data shows, start and end station asymmetry change with the day of the week.The most asymmetric start station on Monday is "Grand Army Plaza & Central Park S", with 21 more uses as a start station than as an end station. The most asymmetric end station on Monday is "W 41 St & 8 Ave", with 18 more uses as an end station than as a start station.The most asymmetric start station on Tuesday is "Penn Station Valet", with 31 more uses as a start station than as an end station. The most asymmetric end station on Tuesday is "W 39 St & 9 Ave", with 24 more uses as an end station than as a start station.The most asymmetric start station on Wednesday is "W 42 St & Dyer Ave", with 26 more uses as a start station than as an end station. The most asymmetric end station on Wednesday is "Cleveland Pl & Spring St", with 24 more uses as an end station than as a start station.The most asymmetric start station on Thursday is "Pershing Square North", with 26 more uses as a start station than as an end station. The most asymmetric end station on Thursday is "Broadway & W 29 St", with 22 more uses as an end station than as a start station.The most asymmetric start station on Friday is "Broadway & W 29 St", with 18 more uses as a start station than as an end station. The most asymmetric end station on Friday is "W 41 St & 8 Ave", with 41 more uses as an end station than as a start station.The most asymmetric start station on Saturday is "Grand Army Plaza & Central Park S", with 17 more uses as a start station than as an end station. The most asymmetric end station on Saturday is "W 21 St & 6 Ave", with 19 more uses as an end station than as a start station.The most asymmetric start station on Sunday is "W 20 St & 11 Ave", with 16 more uses as a start station than as an end station. The most asymmetric end station on Sunday is "Centre St & Chambers St", with 21 more uses as an end station than as a start station.
+```{r}
+
+#monday
+w_monday <- as.data.frame(w_monday)
+w2_monday <- as.data.frame(w2_monday)
+
+
+merged_w_w2_monday <- full_join(w_monday,w2_monday, by = "Var1")
+merged_w_w2_monday <- as.data.frame(merged_w_w2_monday)
+
+#adds new column (Freq_dif)
+merged_w_w2_monday$Freq_dif <- merged_w_w2_monday$Freq.x - merged_w_w2_monday$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_monday <- merged_w_w2_monday[which.max(merged_w_w2_monday$Freq_dif),] 
+most_start_asymm_monday
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_monday <- merged_w_w2_monday[which.min(merged_w_w2_monday$Freq_dif),]
+most_end_asymm_monday
+
+#tuesday
+w_tuesday <- as.data.frame(w_tuesday)
+w2_tuesday<- as.data.frame(w2_tuesday)
+
+
+merged_w_w2_tuesday <- full_join(w_tuesday,w2_tuesday, by = "Var1")
+merged_w_w2_tuesday <- as.data.frame(merged_w_w2_tuesday)
+
+#adds new column (Freq_dif)
+merged_w_w2_tuesday$Freq_dif <- merged_w_w2_tuesday$Freq.x - merged_w_w2_tuesday$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_tuesday <- merged_w_w2_tuesday[which.max(merged_w_w2_tuesday$Freq_dif),] 
+most_start_asymm_tuesday
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_tuesday <- merged_w_w2_tuesday[which.min(merged_w_w2_tuesday$Freq_dif),]
+most_end_asymm_tuesday
+
+#wednesday
+w_wed <- as.data.frame(w_wed)
+w2_wed <- as.data.frame(w2_wed)
+
+
+merged_w_w2_wed <- full_join(w_wed,w2_wed, by = "Var1")
+merged_w_w2_wed <- as.data.frame(merged_w_w2_wed)
+
+#adds new column (Freq_dif)
+merged_w_w2_wed$Freq_dif <- merged_w_w2_wed$Freq.x - merged_w_w2_wed$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_wed <- merged_w_w2_wed[which.max(merged_w_w2_wed$Freq_dif),] 
+most_start_asymm_wed
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_wed <- merged_w_w2_wed[which.min(merged_w_w2_wed$Freq_dif),]
+most_end_asymm_wed 
+
+#thursday
+w_thurs <- as.data.frame(w_thurs)
+w2_thurs <- as.data.frame(w2_thurs)
+
+
+merged_w_w2_thurs <- full_join(w_thurs,w2_thurs, by = "Var1")
+merged_w_w2_thurs <- as.data.frame(merged_w_w2_thurs)
+
+#adds new column (Freq_dif)
+merged_w_w2_thurs$Freq_dif <- merged_w_w2_thurs$Freq.x - merged_w_w2_thurs$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_thurs <- merged_w_w2_thurs[which.max(merged_w_w2_thurs$Freq_dif),] 
+most_start_asymm_thurs
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_thurs <- merged_w_w2_thurs[which.min(merged_w_w2_thurs$Freq_dif),]
+most_end_asymm_thurs
+
+#friday
+w_fri <- as.data.frame(w_fri)
+w2_fri <- as.data.frame(w2_fri)
+
+
+merged_w_w2_fri <- full_join(w_fri,w2_fri, by = "Var1")
+merged_w_w2_fri <- as.data.frame(merged_w_w2_fri)
+
+#adds new column (Freq_dif)
+merged_w_w2_fri$Freq_dif <- merged_w_w2_fri$Freq.x - merged_w_w2_fri$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_fri <- merged_w_w2_fri[which.max(merged_w_w2_fri$Freq_dif),] 
+most_start_asymm_fri
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_fri <- merged_w_w2_fri[which.min(merged_w_w2_fri$Freq_dif),]
+most_end_asymm_fri
+
+#sat
+w_sat <- as.data.frame(w_sat)
+w2_sat <- as.data.frame(w2_sat)
+
+
+merged_w_w2_sat <- full_join(w_sat,w2_sat, by = "Var1")
+merged_w_w2_sat <- as.data.frame(merged_w_w2_sat)
+
+#adds new column (Freq_dif)
+merged_w_w2_sat$Freq_dif <- merged_w_w2_sat$Freq.x - merged_w_w2_sat$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_sat <- merged_w_w2_sat[which.max(merged_w_w2_sat$Freq_dif),] 
+most_start_asymm_sat
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_sat <- merged_w_w2_sat[which.min(merged_w_w2_sat$Freq_dif),]
+most_end_asymm_sat
+
+#sun
+w_sun <- as.data.frame(w_sun)
+w2_sun <- as.data.frame(w2_sun)
+
+
+merged_w_w2_sun <- full_join(w_sun,w2_sun, by = "Var1")
+merged_w_w2_sun <- as.data.frame(merged_w_w2_sun)
+
+#adds new column (Freq_dif)
+merged_w_w2_sun$Freq_dif <- merged_w_w2_sun$Freq.x - merged_w_w2_sun$Freq.y 
+# negative numbers in Freq_diff means more returns then starts 
+
+#returns max diff ---most asymmetric station in favor of starts (most starts - ends)
+most_start_asymm_sun <- merged_w_w2_sun[which.max(merged_w_w2_sun$Freq_dif),] 
+most_start_asymm_sun
+
+#returns min diff --most asymmetric station in favor of ends (most ends - starts)
+most_end_asymm_sun <- merged_w_w2_sun[which.min(merged_w_w2_sun$Freq_dif),]
+most_end_asymm_sun
+
+```
+
+Below, there are barplots of stations with the largest start and end asymmetry for each day of the week. As the first the plot shows, the day with largest amount of start station asymmetry is Tuesday. As the second plot shows, the day with the most end station asymmety is Friday. 
+```{r}
+
+#barplot of most asymmetric start station by day of week 
+most_start_asymm_day_week <- rbind(most_start_asymm_monday, most_start_asymm_tuesday, most_start_asymm_wed, most_start_asymm_thurs, most_start_asymm_fri, most_start_asymm_sat, most_start_asymm_sun)
+
+most_start_asymm_day_week$Day_of_Week <- c("Monday", "Tuesday", "Wed", "Thursday", "Friday", "Saturday", "Sunday")
+
+barplot(most_start_asymm_day_week$Freq_dif, names.arg = most_start_asymm_day_week$Day_of_Week, col = c("slategray2", "slategray3", "slategray4", "steelblue2", "steelblue3", "steelblue4", "lightblue4"), las = 1, main = "Most Asymmetric Start Station by Day of Week", xlab = "Day of Week", ylab = "Asymmetry Count") 
+
+
+#barplot of most asymmetric end station by day of week 
+most_end_asymm_day_week <- rbind(most_end_asymm_monday, most_end_asymm_tuesday, most_end_asymm_wed, most_end_asymm_thurs, most_end_asymm_fri, most_end_asymm_sat, most_end_asymm_sun)
+
+most_end_asymm_day_week$Day_of_Week <- c("Monday", "Tuesday", "Wed", "Thursday", "Friday", "Saturday", "Sunday")
+
+barplot(most_end_asymm_day_week$Freq_dif, names.arg = most_end_asymm_day_week$Day_of_Week, col = c("slategray2", "slategray3", "slategray4", "steelblue2", "steelblue3", "steelblue4", "lightblue4"), las = 1, main = "Most Asymmetric End Station by Day of Week", xlab = "Day of Week", ylab = "Asymmetry Count")
+
+
+```
+
+##Which stations originate the longest rides? Does this change as we go through different times of the day? (Q2c)
+
+Below are the top 20 stations originating the longest trip durations, across all time frames.
+```{r,echo=FALSE}
 #Question 2 Part C
 
 cb = as.data.frame(cb)
@@ -197,20 +911,21 @@ longridesafternoon2$longridesafternoon2 <- factor(longridesafternoon2$longridesa
 longridesafternoon2$longridesafternoon2 = as.numeric(longridesafternoon2$longridesafternoon2)
 rownamesafternoon <- row.names(longridesafternoon2)
 
+```
+
+```{r,echo=FALSE}
 #plotting graphs
 op <- par(mar = c(5,15,5,1) + 0.1)
 op2 <- par(mgp=c(2.5,1,0))
 
 barplot(longrides2$longrides2, names.arg = rownamesall, las=1,horiz=TRUE, main= "Top 20 Longest Average \n Trip Durations by Station", xlab = "Average Trip Duration (1000s seconds)")
-
-barplot(longridesmorning2$longridesmorning2, names.arg = rownamesmorning, las=1, horiz=TRUE, main="Top 20 Longest Average Morning \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
-
-barplot(longridesevening2$longridesevening2, names.arg = rownamesevening, las=1, horiz=TRUE, main="Top 20 Longest Average Evening \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
-
-barplot(longridesafternoon2$longridesafternoon2, names.arg = rownamesafternoon, las=1, horiz=TRUE, main="Top 20 Longest Average Afternoon \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
 par(op)
 par(op2)
+```
 
+
+```{r,echo=FALSE}
+#data to calculate venn diagram below:
 rownamesall = as.factor(rownamesall)
 rownamesmorning = as.factor(rownamesmorning)
 rownamesevening = as.factor(rownamesevening)
@@ -277,7 +992,12 @@ eveningonly <- 20-morningNevening2 - eveningNafternoon2 - eveningNall2 - MENA2 -
 afternoononly <- 20 - morningNafternoon2 - eveningNafternoon2 - afternoonNall2 - MENA2 - MANAll2-EANAll2- ALLFOUR2
 #all only
 allonly <- 20- morningNall2 - eveningNall2 - afternoonNall2 - MENAll2 - MANAll2 - EANAll2- ALLFOUR2
+```
 
+This Venn diagram displays the overlaps between top 20 stations originating the longest trip druations, across time frames. We can clearly see that the top 20 stations changes significantly as the time of day changes.
+
+Some stations are only within the top 20 busiest stations list during a designated time frame (e.g., morning, evening, afternoon), whereas other stations are busy across multiple time frames (e.g., morning and afternoon). No stations are in the top 20 busiest stations list for the entire day (i.e., morning to afternoon to evening.
+```{r,echo=FALSE}
 venn.plot <- draw.quad.venn(20, 20, 20, 20, morningNafternoon2, morningNevening2, morningNall2, eveningNafternoon2, afternoonNall2,
 eveningNall2, MENA2, MANAll2, MENAll2, EANAll2, ALLFOUR2, category = c("Morning","Afternoon", "Evening", "All"), lwd = rep(2, 4), lty = rep("solid", 4), col =
 rep("black", 4), fill = c("blue","red","green","yellow"), alpha = rep(0.5, 4),
@@ -291,18 +1011,55 @@ rep(list(c(0.5, 0.5)), 4), rotation.degree = 0,
 rotation.centre = c(0.5, 0.5), ind = TRUE, cex.prop =
 NULL, print.mode = "raw", sigdigs = 3, direct.area =
 FALSE, area.vector = 0)
+```
 
+
+
+Below we can compare the specific stations comprising the top 20 stations originating the longest rides, in each time frame.
+```{r,echo=FALSE}
+rownamesall <- rownamesall[order(rownamesall)]
+rownamesmorning <- rownamesmorning[order(rownamesmorning)]
+rownamesafternoon <- rownamesafternoon[order(rownamesafternoon)]
+rownamesevening <- rownamesevening[order(rownamesevening)]
+
+toptimesdf <- data.frame(rownamesall,rownamesmorning,rownamesafternoon, rownamesevening)
+
+names(toptimesdf)[names(toptimesdf)=="rownamesall"] <- "All data"
+names(toptimesdf)[names(toptimesdf)=="rownamesmorning"] <- "Morning data"
+names(toptimesdf)[names(toptimesdf)=="rownamesevening"] <- "Evening data"
+names(toptimesdf)[names(toptimesdf)=="rownamesafternoon"] <- "Afternoon data"
+
+
+
+toptimestable <-kable(toptimesdf, format = "markdown")
+
+toptimestable
 #NEED TO VERIFY THESE NUMBERS
+```
+
+In the below barcharts, we can see that the top 20 stations originating the longest trip durations generate similar distributions in average trip duration.
+
+
+```{r,echo=FALSE}
+op <- par(mar = c(5,15,5,1) + 0.1)
+op2 <- par(mgp=c(2.5,1,0))
+
+barplot(longridesmorning2$longridesmorning2, names.arg = rownamesmorning, las=1, horiz=TRUE, main="Top 20 Longest Average Morning \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+
+barplot(longridesevening2$longridesevening2, names.arg = rownamesevening, las=1, horiz=TRUE, main="Top 20 Longest Average Evening \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+
+barplot(longridesafternoon2$longridesafternoon2, names.arg = rownamesafternoon, las=1, horiz=TRUE, main="Top 20 Longest Average Afternoon \n Trip Durations by Station", xlab="Average Trip Duration (1000s seconds)")
+par(op)
+par(op2)
 
 ```
 
-##Popular Start and Stop Stations For Subscribers vs Customers
+##Popular Start and Stop Stations For Subscribers vs Customers (Q2d)
 
 Ours graphs indicate that at least 10% of the stations have a substantial difference between subscribers versus customers. For both start station and end station, Pershing Square North has the largest difference at 60. We recommend focusing efforts around improving subscriber experience at these stations that attract more subscribers than customers. 
 
 
 ```{r}
-#Question 2 Part D
 
 findDifference <- function(sub, cus, searchId) {
   newDf <- data.frame()
@@ -337,6 +1094,11 @@ ggplot(data=topEndDifferences, aes(x=stationName, y=dif)) +
 
 ```
 
+##Linear Regression of Ride Duration Based on Age (Q2e)
+
+TO DO: WRITEUP OF INSIGHTS
+
+We considered a simple linear regression to predict trip duration based on age. 
 ```{r}
 #Question 2 Part E
 
@@ -439,7 +1201,8 @@ leaflet(subscriber_count) %>% addTiles() %>%
 ```
 
 ##Are Certain Bikes Used More?
-### Yes - there is quite a large range
+
+Yes - there is quite a large range between usage by specific bike.
 
 ```{r}
 ##isolate bike ids
@@ -463,7 +1226,8 @@ boxplot(bikedata$no_rows, horizontal = TRUE, xlab="Number of Uses", main="Uses p
 ```
 
 ##Are Most Bikes Returned to Their Start Station?
-###No - in fact, 98% of bikes are returned to a different station
+
+No - in fact, 98% of bikes are returned to a different station
 
 ```{r}
 #count number of times bike is returned to start station
@@ -525,6 +1289,10 @@ leaflet(duration_averages) %>% addTiles() %>%
 
 
 ```
+
+
+MICHAEL please add an intepretation of the results
+
 
 ```{r}
 top_n <- function(dataFrame) {
