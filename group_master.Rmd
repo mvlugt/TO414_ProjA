@@ -1291,7 +1291,12 @@ leaflet(duration_averages) %>% addTiles() %>%
 ```
 
 
-MICHAEL please add an intepretation of the results
+###Insights from Map #2
+
+* Red dots indicate stations with more arrivals than departures; Blue dots represent stations with more departures than arrivals.
+* The difference in departures versus arrivals seems to be fairly evenly distributed across stations.
+* However, a few stations that stand out are W 13th & 6th Avenue, which has significantly more bike arrivals and departures, and W 31st & 9thStreet, which has more bike departures than arrivals. These differences can be inferred from the circle radius size.
+* We would suggest that these stations with higher arrival or departure counts be marked as high traffic areas and be provided more bikes or another docking rack.
 
 
 ```{r}
